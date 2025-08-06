@@ -79,7 +79,9 @@ pip install -r requirements.txt
     # OpenAI 或兼容的 API 配置
     OPENAI_API_KEY="sk-your_api_key_here"
     OPENAI_BASE_URL="https://api-inference.modelscope.cn/v1" # 根据您的服务商修改
-
+    NUTRITIONIX_API_URL="https://trackapi.nutritionix.com/v2/natural/nutrients"
+    NUTRITIONIX_APP_ID="<YOUR_APP_ID>"
+    NUTRITIONIX_API_KEY="<YOUR_API_KEY>"
     # Agent 模型配置
     AGENT_MODEL=ZhipuAI/GLM-4.5
     # ... 其他配置保持默认即可
