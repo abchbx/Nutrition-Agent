@@ -1,0 +1,12 @@
+{
+    "user_id": "user_001",
+    "name": "李思琪",
+    "age": 28,
+    "gender": "女",
+    "height": 165.0,
+    "weight": 55.0,
+    "activity_level": "轻度活动",
+    "health_goal": "维持体重",
+    "dietary_restrictions": "无麸质",
+    "preferences": "喜欢沙拉，不吃牛肉"
+}

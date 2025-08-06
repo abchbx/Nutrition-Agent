@@ -1,0 +1,12 @@
+{
+    "user_id": "user_004",
+    "name": "王建国",
+    "age": 45,
+    "gender": "男",
+    "height": 172.0,
+    "weight": 90.0,
+    "activity_level": "久坐",
+    "health_goal": "减肥",
+    "dietary_restrictions": "低糖",
+    "preferences": "爱喝茶，不吃甜食"
+}

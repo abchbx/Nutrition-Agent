@@ -1,0 +1,12 @@
+{
+    "user_id": "user_005",
+    "name": "刘雨彤",
+    "age": 30,
+    "gender": "女",
+    "height": 168.0,
+    "weight": 60.0,
+    "activity_level": "轻度活动",
+    "health_goal": "维持体重",
+    "dietary_restrictions": "无",
+    "preferences": "喜欢海鲜，不吃羊肉"
+}

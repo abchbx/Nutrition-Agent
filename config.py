@@ -17,7 +17,7 @@ AGENT_MODEL = os.getenv("AGENT_MODEL", "glm-4-flash")
 AGENT_TEMPERATURE = float(os.getenv("AGENT_TEMPERATURE", "0.7"))
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "BAAI/bge-large-zh-v1.5")
 # 用户数据存储
-USER_DATA_PATH = os.getenv("USER_DATA_PATH", "./data/user_data.json")
+USER_DATA_PATH = os.getenv("USER_DATA_PATH", "./user_profiles")
 
 # 日志配置
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")

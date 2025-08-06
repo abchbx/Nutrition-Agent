@@ -75,7 +75,7 @@ class DietAdviceTool(BaseTool):
 - [ ] 午餐：...
 """
         )
-        self.diet_chain = LLMChain(llm=self.llm, prompt=self.diet_prompt)
+        self.diet_chain = self.diet_prompt | self.llm
     
     def _run(self, age: int, gender: str, height: float, weight: float,
              activity_level: str, health_goal: str, dietary_restrictions: str = "无",
@@ -215,7 +215,7 @@ class MealPlanTool(BaseTool):
 * (在此处提供对这个膳食搭配的专业点评和建议)
 """
         )
-        self.meal_chain = LLMChain(llm=self.llm, prompt=self.meal_prompt)
+        self.meal_chain = self.meal_prompt | self.llm
 
     def _run(self, meals: str, calories_target: int, preferences: str = "无") -> str:
         # ... 此处及之后的代码无需改动 ...

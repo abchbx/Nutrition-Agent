@@ -1,13 +1,18 @@
+import numpy as np
 from typing import Dict, Any, Type
 from langchain_core.tools import BaseTool
 from langchain_core.prompts import PromptTemplate
-# 推荐更新：从 langchain_openai 导入
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.docstore import InMemoryDocstore
 from langchain_core.documents import Document
 from langchain_community.vectorstores import FAISS
-from config import AGENT_MODEL, AGENT_TEMPERATURE, EMBEDDING_MODEL 
+# --- 修改开始：导入必要的模块 ---
+from langchain_community.docstore import InMemoryDocstore
+from faiss import IndexIVFPQ, IndexFlatL2
+# --- 修改结束 ---
+from config import AGENT_MODEL, AGENT_TEMPERATURE, EMBEDDING_MODEL
 from pydantic import BaseModel, Field
 import sys
 import os
@@ -27,21 +32,22 @@ class NutritionQATool(BaseTool):
     name: str = "nutrition_qa"
     description: str = "回答营养学相关的知识问题，包括营养原理、健康饮食、营养素功能等"
     args_schema: Type[BaseModel] = NutritionQAInput
-    
-    # --- 修复1：声明所有实例属性并提供默认值 ---
+
     llm: Any = None
     embeddings: Any = None
     knowledge_base: Any = None
     qa_prompt: Any = None
     qa_chain: Any = None
-    
-    def __init__(self):
+
+    # --- 关键修复 1：修改构造函数以接收共享的 embedding 模型 ---
+    def __init__(self, embeddings: HuggingFaceEmbeddings):
         super().__init__()
         self.llm = ChatOpenAI(
             model_name=AGENT_MODEL,
             temperature=AGENT_TEMPERATURE
         )
-        self.embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
+        # 使用从外部传入的、已经加载好的模型实例
+        self.embeddings = embeddings
         self.knowledge_base = self._create_knowledge_base()
 
         self.qa_prompt = PromptTemplate(
@@ -70,28 +76,46 @@ class NutritionQATool(BaseTool):
 请使用Markdown格式进行排版，以提高可读性。可以使用标题（如 '##'）、要点（如 '*' 或 '-'）和粗体（如 '**重点**'）来组织你的回答。
 """
         )
-        # --- 修复2：使用新的LCEL语法 (prompt | llm) ---
         self.qa_chain = self.qa_prompt | self.llm
+
 
     def _create_knowledge_base(self) -> FAISS:
         nutrition_docs = [
-            Document(page_content="宏量营养素包括...", metadata={"category": "宏量营养素", "topic": "碳水化合物"}),
-            Document(page_content="蛋白质是生命的基础...", metadata={"category": "宏量营养素", "topic": "蛋白质"}),
-            Document(page_content="脂肪是重要的能量储存形式...", metadata={"category": "宏量营养素", "topic": "脂肪"}),
-            Document(page_content="微量营养素包括...", metadata={"category": "微量营养素", "topic": "维生素和矿物质"}),
-            Document(page_content="膳食纤维是不能被...", metadata={"category": "其他营养素", "topic": "膳食纤维"}),
-            Document(page_content="水是生命必需的营养素...", metadata={"category": "其他营养素", "topic": "水"}),
-            Document(page_content="健康饮食的基本原则...", metadata={"category": "健康饮食", "topic": "基本原则"}),
-            Document(page_content="体重管理的基本原理...", metadata={"category": "体重管理", "topic": "热量平衡"}),
-            Document(page_content="不同生命阶段...", metadata={"category": "特殊人群", "topic": "生命阶段营养"}),
-            Document(page_content="运动营养需要根据...", metadata={"category": "运动营养", "topic": "运动与营养"})
+            Document(page_content="宏量营养素包括碳水化合物、蛋白质和脂肪，是身体能量的主要来源。", metadata={"category": "宏量营养素", "topic": "基础"}),
+            Document(page_content="蛋白质是构成肌肉、器官和酶的基础，对于生长和修复至关重要。", metadata={"category": "宏量营养素", "topic": "蛋白质"}),
+            Document(page_content="膳食纤维有助于肠道健康，能增加饱腹感，常见于蔬菜、水果和全谷物中。", metadata={"category": "其他营养素", "topic": "膳食纤维"}),
         ]
-
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
         texts = text_splitter.split_documents(nutrition_docs)
 
-        return FAISS.from_documents(texts, self.embeddings)
+        try:
+            print("💡 正在为QA工具创建知识库 (使用 IndexFlatL2)...")
+            
+            embeddings_vectors = self.embeddings.embed_documents([doc.page_content for doc in texts])
+            vectors = np.array(embeddings_vectors, dtype=np.float32)
+            embedding_dimension = vectors.shape[1]
+            
+            # --- 【核心修正】同样使用 IndexFlatL2 ---
+            index = IndexFlatL2(embedding_dimension)
+            index.add(vectors)
 
+            docstore = InMemoryDocstore({str(i): doc for i, doc in enumerate(texts)})
+            index_to_docstore_id = {i: str(i) for i in range(len(texts))}
+
+            knowledge_base = FAISS(
+                embedding_function=self.embeddings.embed_query,
+                index=index,
+                docstore=docstore,
+                index_to_docstore_id=index_to_docstore_id
+            )
+
+            print("✅ QA工具知识库创建成功!")
+            return knowledge_base
+        
+        except Exception as e:
+            print(f"❌ 创建QA知识库时出错: {e}")
+            # 在这种简单模式下，如果还出错，直接使用更上层的函数
+            return FAISS.from_documents(texts, self.embeddings)
     def _run(self, question: str, detail_level: str = "中等") -> str:
         try:
             relevant_docs = self.knowledge_base.similarity_search(question, k=3)
@@ -99,8 +123,6 @@ class NutritionQATool(BaseTool):
             if not context:
                 context = "未找到相关的营养学知识文档，将基于专业知识回答。"
 
-            # --- 修复2：使用 .invoke() 代替 .run()，并传入字典 ---
-            # .invoke() 的返回值直接就是一个内容对象，我们需要提取其 .content 属性
             response = self.qa_chain.invoke({
                 "question": question,
                 "context": context,
@@ -124,6 +146,8 @@ class NutritionQATool(BaseTool):
         except Exception as e:
             return f"回答营养学问题时发生错误: {str(e)}"
 
+# --- 下面的 NutritionMythTool 部分保持不变 ---
+
 class NutritionMythInput(BaseModel):
     """营养误区辨析工具输入模型"""
     myth: str = Field(description="需要辨析的营养误区或流行说法")
@@ -134,7 +158,6 @@ class NutritionMythTool(BaseTool):
     description: str = "辨析营养学误区和流行说法，提供科学依据"
     args_schema: Type[BaseModel] = NutritionMythInput
 
-    # --- 修复1：声明所有实例属性并提供默认值 ---
     llm: Any = None
     myth_prompt: Any = None
     myth_chain: Any = None
@@ -175,12 +198,10 @@ class NutritionMythTool(BaseTool):
 * 如果原说法有可取之处，可以提出更科学的替代方案。
 """
         )
-        # --- 修复2：使用新的LCEL语法 (prompt | llm) ---
         self.myth_chain = self.myth_prompt | self.llm
 
     def _run(self, myth: str) -> str:
         try:
-            # --- 修复2：使用 .invoke() 代替 .run()，并传入字典 ---
             response = self.myth_chain.invoke({"myth": myth})
             analysis = response.content
             

@@ -8,7 +8,7 @@ import time
 st.set_page_config(
     page_title="营养学AI助手",
     page_icon="🍎",
-    layout="wide" # 将布局设置为 'wide' 以便更好地展示内容
+    layout="wide"
 )
 
 st.title("🍎 营养学 AI 助手")
@@ -16,14 +16,12 @@ st.caption("我是您的专属营养师，随时为您解答营养问题，提�
 
 
 # --- Agent 初始化 ---
-# 使用 st.cache_resource 来缓存Agent实例，避免每次交互都重新加载模型，这对于性能至关重要！
 @st.cache_resource
 def load_agent():
     """
     加载并缓存NutritionAgent，只在第一次运行时执行。
     """
     print("--- 正在加载Agent核心... ---")
-    # 这里我们假设 NutritionAgent 类在 nutrition_agent.py 文件中定义
     agent = NutritionAgent()
     print("--- Agent核心加载完成! ---")
     return agent
@@ -33,37 +31,54 @@ agent = load_agent()
 
 
 # --- 聊天记录管理 ---
-# 使用 session_state 来跨交互保存聊天记录
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
 # --- 用户档案管理 (侧边栏) ---
 with st.sidebar:
     st.title("👤 用户档案")
-    user_id = st.text_input("请输入您的用户ID", "user_streamlit")
+    user_id = st.text_input("请输入您的用户ID", "user_018")
     st.info(f"当前用户ID: **{user_id}**")
 
-    # 使用表单来收集用户信息，可以避免每次输入都刷新页面
+    # 每次user_id变化时，都尝试重新加载档案
+    profile = agent.get_user_profile(user_id)
+
+    # 如果档案存在，显示一个成功的提示
+    if profile:
+        st.success("已成功加载您的档案！")
+
+    # 使用表单来收集用户信息
     with st.form("user_profile_form"):
         st.subheader("基本信息")
-        name = st.text_input("姓名", "小明")
-        age = st.number_input("年龄", min_value=1, max_value=120, value=25)
-        gender = st.selectbox("性别", ["男", "女"])
+        # --- 核心修改：使用对象的属性来设置默认值 ---
+        name = st.text_input("姓名", value=profile.name if profile else "小明")
+        age = st.number_input("年龄", min_value=1, max_value=120, value=profile.age if profile else 25)
+        
+        # 为了处理selectbox的默认值，我们需要知道默认选项的索引
+        gender_options = ["男", "女", "未知"]
+        gender_index = gender_options.index(profile.gender) if profile and profile.gender in gender_options else 0
+        gender = st.selectbox("性别", gender_options, index=gender_index)
         
         st.subheader("身体数据")
-        height = st.number_input("身高 (cm)", min_value=50.0, max_value=250.0, value=175.0, step=0.5)
-        weight = st.number_input("体重 (kg)", min_value=10.0, max_value=200.0, value=70.0, step=0.1)
+        height = st.number_input("身高 (cm)", min_value=50.0, max_value=250.0, value=profile.height if profile else 175.0, step=0.5)
+        weight = st.number_input("体重 (kg)", min_value=10.0, max_value=200.0, value=profile.weight if profile else 70.0, step=0.1)
 
         st.subheader("生活习惯与目标")
-        activity_level = st.selectbox("活动水平", ["久坐", "轻度活动", "中度活动", "重度活动"])
-        health_goal = st.selectbox("健康目标", ["减肥", "增重", "维持体重", "增肌", "改善健康"])
-        dietary_restrictions = st.text_input("饮食限制 (如: 素食, 无麸质)", "无")
-        preferences = st.text_area("食物偏好或不喜欢的食物", "喜欢吃鱼，不喜欢吃苦瓜")
+        activity_options = ["久坐", "轻度活动", "中度活动", "重度活动"]
+        activity_index = activity_options.index(profile.activity_level) if profile and profile.activity_level in activity_options else 1
+        activity_level = st.selectbox("活动水平", activity_options, index=activity_index)
+
+        goal_options = ["减肥", "增重", "维持体重", "增肌", "改善健康"]
+        goal_index = goal_options.index(profile.health_goal) if profile and profile.health_goal in goal_options else 4
+        health_goal = st.selectbox("健康目标", goal_options, index=goal_index)
+        
+        dietary_restrictions = st.text_input("饮食限制 (如: 素食, 无麸质)", value=profile.dietary_restrictions if profile else "无")
+        preferences = st.text_area("食物偏好或不喜欢的食物", value=profile.preferences if profile else "喜欢吃鱼，不喜欢吃苦瓜")
 
         # 表单提交按钮
         submitted = st.form_submit_button("保存或更新档案")
         if submitted:
-            # 调用后端的 create_user_profile 方法
+            # 调用后端的 create_user_profile 方法，它现在也负责更新
             success = agent.create_user_profile(
                 user_id=user_id, name=name, age=age, gender=gender,
                 height=height, weight=weight, activity_level=activity_level,
@@ -94,13 +109,11 @@ if prompt := st.chat_input("请输入您的问题..."):
     with st.chat_message("assistant"):
         with st.spinner("营养师正在思考..."):
             # 调用您的Agent的chat方法
-            # 注意：这里的 user_id 是从侧边栏获取的
             response = agent.chat(user_id, prompt)
             
             # 使用打字机效果显示回复
             message_placeholder = st.empty()
             full_response = ""
-            # .split() 对于复杂的Markdown可能效果不佳，我们按字符流模拟
             for char in response:
                 full_response += char
                 time.sleep(0.01) # 控制打字速度

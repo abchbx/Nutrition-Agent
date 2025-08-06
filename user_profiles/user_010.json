@@ -1,0 +1,12 @@
+{
+    "user_id": "user_010",
+    "name": "孙浩然",
+    "age": 31,
+    "gender": "男",
+    "height": 182.0,
+    "weight": 78.0,
+    "activity_level": "轻度活动",
+    "health_goal": "维持体重",
+    "dietary_restrictions": "无",
+    "preferences": "爱吃牛排，不吃内脏"
+}

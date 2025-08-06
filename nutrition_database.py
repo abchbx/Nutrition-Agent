@@ -12,39 +12,28 @@ from config import EMBEDDING_MODEL
 # --- 修改结束 ---
 from langchain_core.documents import Document
 from langchain_community.vectorstores import FAISS
+from faiss import IndexIVFPQ, IndexFlatL2
+from langchain_community.docstore import InMemoryDocstore
 import pickle
 
 class NutritionDatabase:
     """营养成分数据库管理类"""
 
-    def __init__(self, data_path: str = "./data/nutrition_data.csv", 
+    def __init__(self, embeddings, data_path: str = "./data/nutrition_data.csv", 
                  vector_db_path: str = "./data/faiss_index"):
         """
         初始化营养数据库
-        
-        Args:
-            data_path: 营养数据CSV文件路径
-            vector_db_path: 向量数据库存储路径
         """
         self.data_path = data_path
         self.vector_db_path = vector_db_path
         self.nutrition_data = None
         self.vector_store = None
         
-        # --- 修改开始 ---
-        # 2. 使用我们统一配置的本地模型
-        #    如果您的电脑有NVIDIA显卡，可以使用下面这行来加速
-        #    self.embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL, model_kwargs={'device': 'cuda'})
-        #    如果使用CPU，用下面这行
-        self.embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
-        # --- 修改结束 ---
+        # 使用从外部传入的、已经加载好的模型实例
+        self.embeddings = embeddings
 
-
-        # 创建数据目录
         os.makedirs(os.path.dirname(data_path), exist_ok=True)
         os.makedirs(vector_db_path, exist_ok=True)
-
-        # 加载数据
         self._load_data()
 
     def _load_data(self):
@@ -115,31 +104,54 @@ class NutritionDatabase:
         else:
             self._create_vector_db()
 
-    def _create_vector_db(self):
-        """创建向量数据库"""
-        print("⏳ 正在创建向量数据库...")
-        documents = []
 
+
+
+    def _create_vector_db(self):
+        """创建向量数据库 (使用简单且稳健的 IndexFlatL2 索引)"""
+        print("⏳ 正在创建食物营养向量数据库...")
+        documents = []
         for _, row in self.nutrition_data.iterrows():
             description = (f"{row['food_name']}是一种{row['category']}，每100g含有"
-                           f"热量{row['calories']}千卡，蛋白质{row['protein']}g，"
-                           f"碳水化合物{row['carbs']}g，脂肪{row['fat']}g，"
-                           f"膳食纤维{row['fiber']}g，维生素C{row['vitamin_c']}mg，"
-                           f"钙{row['calcium']}mg，铁{row['iron']}mg。")
-
-            doc = Document(
-                page_content=description,
-                metadata=row.to_dict() # 将整行数据作为元数据
-            )
+                        f"热量{row['calories']}千卡，蛋白质{row['protein']}g，"
+                        f"碳水化合物{row['carbs']}g，脂肪{row['fat']}g，"
+                        f"膳食纤维{row['fiber']}g，维生素C{row['vitamin_c']}mg，"
+                        f"钙{row['calcium']}mg，铁{row['iron']}mg。")
+            doc = Document(page_content=description, metadata=row.to_dict())
             documents.append(doc)
 
-        # 创建向量数据库
-        self.vector_store = FAISS.from_documents(documents, self.embeddings)
+        try:
+            print(f"💡 准备为 {len(documents)} 份食物文档生成向量...")
+            embeddings_vectors = self.embeddings.embed_documents([doc.page_content for doc in documents])
+            vectors = np.array(embeddings_vectors, dtype=np.float32)
+            embedding_dimension = vectors.shape[1]
+            print(f"   - 向量生成完毕，维度: {embedding_dimension}")
 
-        # 保存向量数据库
-        self.vector_store.save_local(self.vector_db_path)
-        print("✅ 成功创建并保存向量数据库")
+            # --- 【核心修正】使用 IndexFlatL2，它不需要训练 ---
+            print("💡 使用 IndexFlatL2 索引，无需训练。")
+            index = IndexFlatL2(embedding_dimension)
+            
+            print("⏳ 正在向索引中添加向量...")
+            index.add(vectors)
+            print(f"✅ 成功添加 {index.ntotal} 个向量到索引!")
 
+            docstore = InMemoryDocstore({str(i): doc for i, doc in enumerate(documents)})
+            index_to_docstore_id = {i: str(i) for i in range(len(documents))}
+
+            self.vector_store = FAISS(
+                embedding_function=self.embeddings.embed_query,
+                index=index,
+                docstore=docstore,
+                index_to_docstore_id=index_to_docstore_id
+            )
+            
+            self.vector_store.save_local(self.vector_db_path)
+            print("✅ 成功创建并保存向量数据库!")
+
+        except Exception as e:
+            print(f"❌ 创建向量数据库时发生严重错误: {e}")
+            import traceback
+            traceback.print_exc()
     def search_nutrition(self, food_name: str, top_k: int = 3) -> List[Dict[str, Any]]:
         """
         搜索食物营养信息
