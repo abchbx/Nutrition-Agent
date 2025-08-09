@@ -24,7 +24,7 @@ def generate_example_prompts(_user_id, _refresh_counter=0):
 
         # 1) 先尝试 JSON
         try:
-            return json.loads(response.strip())[:5]
+            return json.loads(response.strip())[:3]
         except Exception:
             pass
 
