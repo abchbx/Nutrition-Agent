@@ -1,18 +1,16 @@
 import json
-import logging
 import os
-from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+from pydantic import BaseModel, Field
 from config import USER_DATA_PATH
 
-# 配置日志
-logger = logging.getLogger(__name__)
+# Setup logger for user_memory.py
+from config import memory_logger as logger
 
 
-@dataclass
-class UserProfile:
+class UserProfile(BaseModel):
     user_id: str
     name: str
     age: int
@@ -25,11 +23,10 @@ class UserProfile:
     preferences: str
     created_at: str
     updated_at: str
-    consultations: List[Dict[str, Any]] = field(default_factory=list)
+    consultations: List[Dict[str, Any]] = Field(default_factory=list)
 
 
-@dataclass
-class ConsultationRecord:
+class ConsultationRecord(BaseModel):
     consultation_id: str
     user_id: str
     date: str
@@ -55,23 +52,27 @@ class UserMemory:
         try:
             with open(filepath, "r", encoding="utf-8") as f:
                 user_data = json.load(f)
-                if "consultations" not in user_data:
-                    user_data["consultations"] = []
+                # Ensure 'consultations' field exists
+                user_data.setdefault("consultations", [])
+                # Ensure 'created_at' and 'updated_at' fields exist
                 now_iso = datetime.now().isoformat()
-                if "created_at" not in user_data:
-                    user_data["created_at"] = now_iso
-                if "updated_at" not in user_data:
-                    user_data["updated_at"] = now_iso
-                return UserProfile(**user_data)
-        except (json.JSONDecodeError, TypeError) as e:
+                user_data.setdefault("created_at", now_iso)
+                user_data.setdefault("updated_at", now_iso)
+
+                # Use Pydantic model's parse_obj method for robust deserialization
+                return UserProfile.parse_obj(user_data)
+        except (json.JSONDecodeError, Exception) as e:  # Catch broader exceptions for Pydantic validation
             print(f"❌ 读取或解析用户档案 {filepath} 失败: {e}")
+            logger.error(f"读取或解析用户档案 {filepath} 失败: {e}")
             return None
 
     def _save_user_profile(self, profile: UserProfile) -> bool:
         filepath = self._get_user_filepath(profile.user_id)
         try:
+            # Use Pydantic model's dict() method for serialization
+            profile_data = profile.dict()
             with open(filepath, "w", encoding="utf-8") as f:
-                json.dump(asdict(profile), f, ensure_ascii=False, indent=4)
+                json.dump(profile_data, f, ensure_ascii=False, indent=4)
             logger.info("成功保存用户档案: %s", filepath)
             return True
         except Exception as e:
@@ -100,7 +101,12 @@ class UserMemory:
             "updated_at": now,
             "consultations": [],
         }
-        profile = UserProfile(**profile_data)
+        try:
+            # Use Pydantic model for validation
+            profile = UserProfile(**profile_data)
+        except Exception as e:
+            logger.error(f"创建用户档案时数据验证失败: {e}")
+            return False
 
         if self._save_user_profile(profile):
             print(f"✅ 成功创建用户档案: {profile.name} ({user_id})")
@@ -116,13 +122,22 @@ class UserMemory:
             print(f"⚠️ 用户 {user_id} 档案不存在，将为您创建一个新档案。")
             return self.create_user_profile(user_id, **kwargs)
 
+        # Update fields dynamically
+        update_data = profile.dict()  # Convert to dict for easy updating
         for key, value in kwargs.items():
-            if hasattr(profile, key):
-                setattr(profile, key, value)
+            if key in update_data:  # Only update existing fields
+                update_data[key] = value
 
-        profile.updated_at = datetime.now().isoformat()
+        update_data["updated_at"] = datetime.now().isoformat()
 
-        if self._save_user_profile(profile):
+        try:
+            # Re-validate and create the updated profile object
+            updated_profile = UserProfile(**update_data)
+        except Exception as e:
+            logger.error(f"更新用户档案时数据验证失败: {e}")
+            return False
+
+        if self._save_user_profile(updated_profile):
             print(f"✅ 成功更新用户档案: {user_id}")
             return True
         return False
@@ -135,17 +150,25 @@ class UserMemory:
             return False
 
         now = datetime.now()
-        record = ConsultationRecord(
-            consultation_id=f"{user_id}_{now.strftime('%Y%m%d_%H%M%S')}",
-            user_id=user_id,
-            date=now.strftime("%Y-%m-%d"),
-            question=question,
-            answer=answer,
-            category=category,
-            created_at=now.isoformat(),
-        )
+        record_data = {
+            "consultation_id": f"{user_id}_{now.strftime('%Y%m%d_%H%M%S')}",
+            "user_id": user_id,
+            "date": now.strftime("%Y-%m-%d"),
+            "question": question,
+            "answer": answer,
+            "category": category,
+            "created_at": now.isoformat(),
+        }
 
-        profile.consultations.append(asdict(record))
+        try:
+            # Validate record data
+            record = ConsultationRecord(**record_data)
+        except Exception as e:
+            logger.error(f"创建咨询记录时数据验证失败: {e}")
+            return False
+
+        # Update profile
+        profile.consultations.append(record.dict())  # Convert record to dict for JSON serialization
         profile.updated_at = now.isoformat()
 
         if self._save_user_profile(profile):

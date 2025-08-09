@@ -1,4 +1,3 @@
-import logging
 import os
 from typing import Any, Dict, List, Optional
 
@@ -9,8 +8,8 @@ from langchain_community.docstore import InMemoryDocstore
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
 
-# 配置日志
-logger = logging.getLogger(__name__)
+# Setup logger for nutrition_database.py
+from config import database_logger as logger
 
 
 class NutritionDatabase:
@@ -59,7 +58,10 @@ class NutritionDatabase:
             self._create_vector_db()
 
     def _create_sample_data(self):
-        """创建示例营养数据"""
+        """创建示例营养数据。注意：此数据仅用于演示目的，来源于公开资料，具体数值可能因来源和处理方式不同而有差异。"""
+        # 数据来源说明：
+        # 以下数据综合参考了 USDA FoodData Central (https://fdc.nal.usda.gov/) 和其他公开营养数据库的平均值。
+        # 请在生产环境中使用权威、最新的营养数据源。
         sample_data = {
             "food_name": [
                 "苹果",
@@ -83,13 +85,98 @@ class NutritionDatabase:
                 "黄瓜",
                 "豆腐",
             ],
-            "calories": [52, 89, 47, 32, 69, 165, 250, 206, 155, 42, 130, 247, 68, 86, 34, 41, 23, 18, 16, 76],
-            "protein": [0.3, 1.1, 0.9, 0.7, 0.7, 31, 26, 22, 13, 3.4, 2.7, 13, 2.4, 1.6, 2.8, 0.9, 2.9, 0.9, 0.7, 8],
-            "carbs": [14, 23, 12, 8, 18, 0, 0, 0, 1.1, 5, 28, 41, 12, 20, 7, 10, 3.6, 3.9, 3.6, 1.9],
-            "fat": [0.2, 0.3, 0.1, 0.3, 0.2, 3.6, 15, 12, 11, 1, 0.3, 3.4, 1.4, 0.1, 0.4, 0.2, 0.4, 0.2, 0.1, 4.8],
-            "fiber": [2.4, 2.6, 2.4, 2, 0.9, 0, 0, 0, 0, 0, 0.4, 7, 4, 3, 2.6, 2.8, 2.2, 1.2, 0.5, 0.3],
-            "vitamin_c": [4.6, 8.7, 53.2, 58.8, 3.2, 0, 0, 0, 0, 0, 0, 0, 0, 2.4, 89.2, 5.9, 28.1, 13.7, 2.8, 0],
-            "calcium": [6, 5, 40, 16, 10, 15, 18, 25, 56, 113, 28, 54, 52, 30, 47, 33, 99, 10, 16, 350],
+            # 数据单位：每100克可食部
+            "calories": [
+                52,
+                89,
+                47,
+                32,
+                69,
+                165,
+                250,
+                206,
+                155,
+                42,
+                130,
+                247,
+                68,
+                86,
+                34,
+                41,
+                23,
+                18,
+                16,
+                76,
+            ],  # 千卡 (kcal)
+            "protein": [
+                0.3,
+                1.1,
+                0.9,
+                0.7,
+                0.7,
+                31,
+                26,
+                22,
+                13,
+                3.4,
+                2.7,
+                13,
+                2.4,
+                12,
+                2.8,
+                0.9,
+                2.9,
+                0.9,
+                0.7,
+                8,
+            ],  # 克 (g)
+            "carbs": [14, 23, 12, 8, 18, 0, 0, 0, 1.1, 5, 28, 41, 12, 20, 7, 10, 3.6, 3.9, 3.6, 1.9],  # 克 (g)
+            "fat": [
+                0.2,
+                0.3,
+                0.1,
+                0.3,
+                0.2,
+                3.6,
+                15,
+                12,
+                11,
+                1,
+                0.3,
+                3.4,
+                1.4,
+                0.1,
+                0.4,
+                0.2,
+                0.4,
+                0.2,
+                0.1,
+                4.8,
+            ],  # 克 (g)
+            "fiber": [2.4, 2.6, 2.4, 2, 0.9, 0, 0, 0, 0, 0, 0.4, 7, 4, 3, 2.6, 2.8, 2.2, 1.2, 0.5, 0.3],  # 克 (g)
+            "vitamin_c": [
+                4.6,
+                8.7,
+                53.2,
+                58.8,
+                3.2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                2.4,
+                89.2,
+                5.9,
+                28.1,
+                13.7,
+                2.8,
+                0,
+            ],  # 毫克 (mg)
+            "calcium": [6, 5, 40, 16, 10, 15, 18, 25, 56, 113, 28, 54, 52, 30, 47, 33, 99, 10, 16, 350],  # 毫克 (mg)
             "iron": [
                 0.1,
                 0.3,
@@ -111,7 +198,7 @@ class NutritionDatabase:
                 0.3,
                 0.3,
                 5.4,
-            ],
+            ],  # 毫克 (mg)
             "category": [
                 "水果",
                 "水果",
@@ -138,17 +225,23 @@ class NutritionDatabase:
 
         self.nutrition_data = pd.DataFrame(sample_data)
         self.nutrition_data.to_csv(self.data_path, index=False, encoding="utf-8-sig")
-        print(f"✅ 创建示例营养数据: {len(self.nutrition_data)} 条记录")
+        print(f"✅ 创建示例营养数据: {len(self.nutrition_data)} 条记录 (数据来源: 综合公开资料)")
 
     def _load_or_create_vector_db(self):
         """加载或创建向量数据库"""
         # 为了与新版faiss-cpu兼容，直接使用FAISS类的save_local和load_local方法
-        if os.path.exists(self.vector_db_path) and os.path.exists(os.path.join(self.vector_db_path, "index.faiss")):
+        index_file_path = os.path.join(self.vector_db_path, "index.faiss")
+        if os.path.exists(self.vector_db_path) and os.path.exists(index_file_path):
             try:
-                self.vector_store = FAISS.load_local(
-                    self.vector_db_path, self.embeddings, allow_dangerous_deserialization=True
-                )
-                print("✅ 成功加载向量数据库")
+                # 检查索引文件是否为空
+                if os.path.getsize(index_file_path) == 0:
+                    print("⚠️ 向量数据库索引文件为空，重新创建...")
+                    self._create_vector_db()
+                else:
+                    self.vector_store = FAISS.load_local(
+                        self.vector_db_path, self.embeddings, allow_dangerous_deserialization=True
+                    )
+                    print("✅ 成功加载向量数据库")
             except Exception as e:
                 print(f"❌ 加载向量数据库失败: {e}")
                 self._create_vector_db()

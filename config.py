@@ -1,13 +1,54 @@
-import os
 import logging
+import os
+from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 
-# 配置日志
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # 加载环境变量
 load_dotenv()
+
+
+# --- 移除原有的 basicConfig ---
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger(__name__)
+load_dotenv()
+
+# --- 移除原有的 basicConfig ---
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger(__name__)
+
+# --- 新的详细日志配置 ---
+def setup_logger(name: str, log_file: str, level=logging.INFO) -> logging.Logger:
+    """配置一个带有文件轮转和格式化的日志记录器"""
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s")
+
+    # 文件处理器，带轮转
+    file_handler = RotatingFileHandler(log_file, maxBytes=5 * 1024 * 1024, backupCount=3)  # 5MB, 3 backups
+    file_handler.setFormatter(formatter)
+    file_handler.setLevel(level)
+
+    # 控制台处理器
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    console_handler.setLevel(level)
+
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
+    # 避免重复添加处理器（如果模块被多次导入）
+    logger.propagate = False
+
+    return logger
+
+
+# 为不同模块创建日志记录器
+app_logger = setup_logger("app", "logs/app.log")
+config_logger = setup_logger("config", "logs/config.log")
+agent_logger = setup_logger("nutrition_agent", "logs/agent.log")
+database_logger = setup_logger("nutrition_database", "logs/database.log")
+memory_logger = setup_logger("user_memory", "logs/memory.log")
 
 # OpenAI配置
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")

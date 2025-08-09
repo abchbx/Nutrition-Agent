@@ -1,0 +1,65 @@
+2025-08-09 05:24:35,992 - nutrition_agent - INFO - nutrition_agent.py:38 - 开始初始化营养学Agent...
+2025-08-09 05:24:35,992 - nutrition_agent - INFO - nutrition_agent.py:38 - 开始初始化营养学Agent...
+2025-08-09 05:24:35,992 - nutrition_agent - INFO - nutrition_agent.py:38 - 开始初始化营养学Agent...
+2025-08-09 05:24:35,993 - nutrition_agent - INFO - nutrition_agent.py:40 - 正在加载共享的Embedding模型...
+2025-08-09 05:24:35,993 - nutrition_agent - INFO - nutrition_agent.py:40 - 正在加载共享的Embedding模型...
+2025-08-09 05:24:35,993 - nutrition_agent - INFO - nutrition_agent.py:40 - 正在加载共享的Embedding模型...
+2025-08-09 05:24:47,462 - nutrition_agent - INFO - nutrition_agent.py:43 - Embedding模型加载完成!
+2025-08-09 05:24:47,462 - nutrition_agent - INFO - nutrition_agent.py:43 - Embedding模型加载完成!
+2025-08-09 05:24:47,462 - nutrition_agent - INFO - nutrition_agent.py:43 - Embedding模型加载完成!
+2025-08-09 05:24:59,579 - nutrition_agent - INFO - nutrition_agent.py:50 - 营养学Agent初始化完成!
+2025-08-09 05:24:59,579 - nutrition_agent - INFO - nutrition_agent.py:50 - 营养学Agent初始化完成!
+2025-08-09 05:24:59,579 - nutrition_agent - INFO - nutrition_agent.py:50 - 营养学Agent初始化完成!
+2025-08-09 05:24:59,586 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 system_prompt_generator 发送消息: 我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。
+2025-08-09 05:24:59,586 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 system_prompt_generator 发送消息: 我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。
+2025-08-09 05:24:59,586 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 system_prompt_generator 发送消息: 我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。
+2025-08-09 05:25:05,383 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 system_prompt_generator 的问题已处理完成
+2025-08-09 05:25:05,383 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 system_prompt_generator 的问题已处理完成
+2025-08-09 05:25:05,383 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 system_prompt_generator 的问题已处理完成
+2025-08-09 05:25:14,494 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 user_001 发送消息: 你好
+2025-08-09 05:25:14,494 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 user_001 发送消息: 你好
+2025-08-09 05:25:14,494 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 user_001 发送消息: 你好
+2025-08-09 05:25:22,491 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 user_001 的问题已处理完成
+2025-08-09 05:25:22,491 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 user_001 的问题已处理完成
+2025-08-09 05:25:22,491 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 user_001 的问题已处理完成
+2025-08-09 05:27:46,164 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 user_001 发送消息: 久坐上班族如何避免下午暴食
+2025-08-09 05:27:46,164 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 user_001 发送消息: 久坐上班族如何避免下午暴食
+2025-08-09 05:27:46,164 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 user_001 发送消息: 久坐上班族如何避免下午暴食
+2025-08-09 05:27:46,164 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 user_001 发送消息: 久坐上班族如何避免下午暴食
+2025-08-09 05:28:18,247 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 user_001 的问题已处理完成
+2025-08-09 05:28:18,247 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 user_001 的问题已处理完成
+2025-08-09 05:28:18,247 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 user_001 的问题已处理完成
+2025-08-09 05:28:18,247 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 user_001 的问题已处理完成
+2025-08-09 05:30:50,128 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 system_prompt_generator 发送消息: 我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。
+2025-08-09 05:30:50,128 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 system_prompt_generator 发送消息: 我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。
+2025-08-09 05:30:50,128 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 system_prompt_generator 发送消息: 我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。
+2025-08-09 05:30:50,128 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 system_prompt_generator 发送消息: 我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。
+2025-08-09 05:30:50,128 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 system_prompt_generator 发送消息: 我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。
+2025-08-09 05:30:55,154 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 system_prompt_generator 的问题已处理完成
+2025-08-09 05:30:55,154 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 system_prompt_generator 的问题已处理完成
+2025-08-09 05:30:55,154 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 system_prompt_generator 的问题已处理完成
+2025-08-09 05:30:55,154 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 system_prompt_generator 的问题已处理完成
+2025-08-09 05:30:55,154 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 system_prompt_generator 的问题已处理完成
+2025-08-09 05:35:04,619 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 user_001 发送消息: 今天几号？
+2025-08-09 05:35:04,619 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 user_001 发送消息: 今天几号？
+2025-08-09 05:35:04,619 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 user_001 发送消息: 今天几号？
+2025-08-09 05:35:04,619 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 user_001 发送消息: 今天几号？
+2025-08-09 05:35:04,619 - nutrition_agent - INFO - nutrition_agent.py:156 - 用户 user_001 发送消息: 今天几号？
+2025-08-09 05:35:07,713 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 user_001 的问题已处理完成
+2025-08-09 05:35:07,713 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 user_001 的问题已处理完成
+2025-08-09 05:35:07,713 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 user_001 的问题已处理完成
+2025-08-09 05:35:07,713 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 user_001 的问题已处理完成
+2025-08-09 05:35:07,713 - nutrition_agent - INFO - nutrition_agent.py:192 - 用户 user_001 的问题已处理完成
+2025-08-09 05:40:42,613 - nutrition_agent - INFO - nutrition_agent.py:38 - 开始初始化营养学Agent...
+2025-08-09 05:40:42,615 - nutrition_agent - INFO - nutrition_agent.py:40 - 正在加载共享的Embedding模型...
+2025-08-09 05:40:53,817 - nutrition_agent - INFO - nutrition_agent.py:43 - Embedding模型加载完成!
+2025-08-09 05:41:05,983 - nutrition_agent - INFO - nutrition_agent.py:50 - 营养学Agent初始化完成!
+2025-08-09 05:41:17,070 - nutrition_agent - INFO - nutrition_agent.py:155 - 用户 system_prompt_generator 发送消息: 我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。
+2025-08-09 05:41:25,061 - nutrition_agent - INFO - nutrition_agent.py:191 - 用户 system_prompt_generator 的问题已处理完成
+2025-08-09 05:41:29,275 - nutrition_agent - INFO - nutrition_agent.py:155 - 用户 user_001 发送消息: 维持体重期间晚餐几点吃最合适
+2025-08-09 05:42:03,670 - nutrition_agent - INFO - nutrition_agent.py:191 - 用户 user_001 的问题已处理完成
+2025-08-09 06:15:02,381 - nutrition_agent - INFO - nutrition_agent.py:35 - 开始初始化营养学Agent...
+2025-08-09 06:15:02,381 - nutrition_agent - INFO - nutrition_agent.py:37 - 正在加载共享的Embedding模型...
+2025-08-09 06:15:13,894 - nutrition_agent - INFO - nutrition_agent.py:40 - Embedding模型加载完成!
+2025-08-09 06:15:26,296 - nutrition_agent - INFO - nutrition_agent.py:47 - 营养学Agent初始化完成!
+2025-08-09 06:15:26,304 - nutrition_agent - INFO - nutrition_agent.py:152 - 用户 system_prompt_generator 发送消息: 我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。

@@ -1,7 +1,9 @@
-# nutrition_agent.py
-import logging
+# 添加项目路径
 import os
 import sys
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 import traceback
 from typing import List, Optional
 
@@ -13,18 +15,17 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
 
-# 添加项目路径
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
+# Setup logger for nutrition_agent.py
+from config import agent_logger as logger
 from config import AGENT_MODEL, AGENT_TEMPERATURE, EMBEDDING_MODEL
 from nutrition_database import NutritionDatabase
 from tools.diet_advice_tool import DietAdviceTool, MealPlanTool
 from tools.nutrition_qa_tool import NutritionMythTool, NutritionQATool
 from tools.nutrition_query_tool import CategorySearchTool, NutritionQueryTool
-from user_memory import UserMemory, UserProfile
+from user_memory import UserMemory
 
-# 配置日志
-logger = logging.getLogger(__name__)
+# UserProfile is now a Pydantic model, import it correctly
+from user_memory import UserProfile
 
 
 class NutritionAgent:
@@ -61,35 +62,49 @@ class NutritionAgent:
 
     def _initialize_agent_executor(self) -> AgentExecutor:
         """使用最新的方法初始化Agent Executor"""
-        system_prompt = """
-    你是一位专业的营养学AI助手，拥有丰富的营养学知识和经验。你的任务是帮助用户解决各种营养相关问题。
-    请根据下面提供的用户档案和历史对话，给出最精准、个性化的回答。
-    在回答时，请自然地结合用户的最新情况和之前的对话内容，展现出你对用户的持续记忆和理解。
+        # 尝试从外部文件加载系统提示词
+        system_prompt_file = "system_prompt.md"
+        if os.path.exists(system_prompt_file):
+            with open(system_prompt_file, "r", encoding="utf-8") as f:
+                system_prompt = f.read()
+        else:
+            # 如果文件不存在，使用内置的默认提示词
+            system_prompt = """
+你是一位专业的营养学AI助手，拥有丰富的营养学知识和经验。你的任务是帮助用户解决各种营养相关问题。
+请根据下面提供的用户档案和历史对话，给出最精准、个性化的回答。
+在回答时，请自然地结合用户的最新情况和之前的对话内容，展现出你对用户的持续记忆和理解。
 
-    你的能力包括：
-    1. 查询食物营养成分信息
-    2. 根据用户情况提供个性化饮食建议
-    3. 回答营养学知识问题
-    4. 辨析营养误区和流行说法
-    5. 生成膳食计划和食物搭配建议
+你的能力包括：
+1. 查询食物营养成分信息
+2. 根据用户情况提供个性化饮食建议
+3. 回答营养学知识问题
+4. 辨析营养误区和流行说法
+5. 生成膳食计划和食物搭配建议
 
-    工作原则：
-    1. 科学准确：所有建议都基于营养学科学原理
-    2. 个性化：根据用户的具体情况提供定制化建议
-    3. 实用性：提供可操作的具体建议
-    4. 全面性：考虑营养均衡和整体健康
-    5. 谨慎性：对于医疗相关问题，建议咨询专业医生
+工作原则：
+1. 科学准确：所有建议都基于营养学科学原理
+2. 个性化：根据用户的具体情况提供定制化建议
+3. 实用性：提供可操作的具体建议
+4. 全面性：考虑营养均衡和整体健康
+5. 谨慎性：对于医疗相关问题，建议咨询专业医生
 
-    使用工具指南：
-    - 只要用户的提问涉及到**任何**特定食物的营养成分，**无论是查询、对比还是其他目的**，都必须为每种食物调用 nutrition_query_tool 工具来获取最准确和格式化的数据
-    - 当用户询问某类食物时，使用category_search工具
-    - 当用户提供个人信息并要求饮食建议时，使用diet_advice工具
-    - 当用户要求特定餐食计划时，使用meal_plan工具
-    - 当用户询问营养学知识问题时，使用nutrition_qa工具
-    - 当用户提到营养误区时，使用nutrition_myth工具
+使用工具指南：
+- 只要用户的提问涉及到**任何**特定食物的营养成分，**无论是查询、对比还是其他目的**，都必须为每种食物调用 nutrition_query_tool 工具来获取最准确和格式化的数据
+- 当用户询问某类食物时，使用category_search工具
+- 当用户提供个人信息并要求饮食建议时，使用diet_advice工具
+- 当用户要求特定餐食计划时，使用meal_plan工具
+- 当用户询问营养学知识问题时，使用nutrition_qa工具
+- 当用户提到营养误区时，使用nutrition_myth工具
 
-    请用专业、友好、易懂的语言与用户交流，让营养学知识变得简单实用。
-    """
+交互优化指南：
+- 保持专业但友好的语调，让营养学知识变得简单实用
+- 当用户问题不明确时，主动询问以获得更多信息
+- 当无法找到确切答案时，诚实告知并提供替代建议
+- 合理使用表情符号和格式化来增强可读性
+- 重要信息要突出显示，复杂概念要用简单语言解释
+
+请用专业、友好、易懂的语言与用户交流，让营养学知识变得简单实用。
+"""
 
         # 1. 将工具绑定到LLM，这是新版Tool-calling agent的做法
         llm_with_tools = self.llm.bind_tools(self.tools)

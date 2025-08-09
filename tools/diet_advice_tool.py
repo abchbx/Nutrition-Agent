@@ -1,6 +1,9 @@
-import logging
+# 添加项目根目录到路径
 import os
 import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from typing import Any, Type
 
 from langchain_core.prompts import PromptTemplate
@@ -8,14 +11,11 @@ from langchain_core.tools import BaseTool
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 
-# 添加项目根目录到路径
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from config import AGENT_MODEL, AGENT_TEMPERATURE
 from nutrition_database import NutritionDatabase
 
-# 配置日志
-logger = logging.getLogger(__name__)
+# Setup logger for diet_advice_tool.py
+from config import agent_logger as logger  # Re-use agent logger or create a new one if needed
 
 
 class DietAdviceInput(BaseModel):
@@ -78,9 +78,13 @@ class DietAdviceTool(BaseTool):
     * 蛋白质: (食物与份量)
     * 蔬果: (食物与份量)
 * **午餐 (约XX千卡):**
-    * (结构同上)
+    * 主食: (食物与份量)
+    * 蛋白质: (食物与份量)
+    * 蔬果: (食物与份量)
 * **晚餐 (约XX千卡):**
-    * (结构同上)
+    * 主食: (食物与份量)
+    * 蛋白质: (食物与份量)
+    * 蔬果: (食物与份量)
 * **加餐 (可选):**
     * (建议的加餐食物与份量)
 
@@ -92,6 +96,8 @@ class DietAdviceTool(BaseTool):
 * (以表格或列表形式，简洁地展示一周的饮食安排，例如: 周一: 高蛋白; 周二: 清淡...)
 
 请确保语言专业、易懂，建议科学合理且具有可操作性。
+合理使用表情符号和格式化来增强可读性。
+重要信息要突出显示，复杂概念要用简单语言解释。
 """,
         )
         self.diet_chain = self.diet_prompt | self.llm
@@ -252,6 +258,10 @@ class MealPlanTool(BaseTool):
 
 #### 👩‍⚕️ 营养师点评
 * (在此处提供对这个膳食搭配的专业点评和建议，说明其优点和注意事项)
+
+请确保语言专业、易懂，建议科学合理且具有可操作性。
+合理使用表情符号和格式化来增强可读性。
+重要信息要突出显示，复杂概念要用简单语言解释。
 """,
         )
         self.meal_chain = self.meal_prompt | self.llm

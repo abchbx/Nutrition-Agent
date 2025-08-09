@@ -1,6 +1,9 @@
-import logging
+# 添加项目根目录到路径
 import os
 import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from typing import Any, Type
 
 import numpy as np
@@ -15,12 +18,10 @@ from langchain_openai import ChatOpenAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pydantic import BaseModel, Field
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from config import AGENT_MODEL, AGENT_TEMPERATURE
 
-# 配置日志
-logger = logging.getLogger(__name__)
+# Setup logger for nutrition_qa_tool.py
+from config import agent_logger as logger  # Re-use agent logger or create a new one if needed
 
 
 class NutritionQAInput(BaseModel):
@@ -76,25 +77,58 @@ class NutritionQATool(BaseTool):
 * (提供2-3条具体、可操作的生活或饮食建议)
 
 请确保回答科学准确、语言通俗易懂。
+合理使用表情符号和格式化来增强可读性。
+重要信息要突出显示，复杂概念要用简单语言解释。
 """,
         )
         self.qa_chain = self.qa_prompt | self.llm
 
     def _create_knowledge_base(self) -> FAISS:
-        nutrition_docs = [
-            Document(
-                page_content="宏量营养素包括碳水化合物、蛋白质和脂肪，是身体能量的主要来源。",
-                metadata={"category": "宏量营养素", "topic": "基础"},
-            ),
-            Document(
-                page_content="蛋白质是构成肌肉、器官和酶的基础，对于生长和修复至关重要。",
-                metadata={"category": "宏量营养素", "topic": "蛋白质"},
-            ),
-            Document(
-                page_content="膳食纤维有助于肠道健康，能增加饱腹感，常见于蔬菜、水果和全谷物中。",
-                metadata={"category": "其他营养素", "topic": "膳食纤维"},
-            ),
-        ]
+        # 尝试从外部 Markdown 文件加载知识库
+        knowledge_base_path = "knowledge_base.md"
+        nutrition_docs = []
+
+        if os.path.exists(knowledge_base_path):
+            try:
+                with open(knowledge_base_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+
+                # 简单地将整个文件内容作为一个文档处理，或可以按章节分割
+                # 这里我们按 '####' 标题分割成多个文档
+                sections = content.split("\n#### ")
+                for i, section in enumerate(sections):
+                    if section.strip():
+                        # 重新加上标题前缀
+                        page_content = section if i == 0 else "#### " + section
+                        nutrition_docs.append(
+                            Document(
+                                page_content=page_content.strip(),
+                                metadata={"source": "knowledge_base.md", "section_id": i},
+                            )
+                        )
+                print(f"✅ 从 {knowledge_base_path} 加载了 {len(nutrition_docs)} 个知识片段。")
+            except Exception as e:
+                print(f"⚠️ 从 {knowledge_base_path} 加载知识库时出错: {e}")
+        else:
+            print(f"⚠️ 知识库文件 {knowledge_base_path} 未找到，使用内置默认知识。")
+
+        # 如果没有从文件加载到内容，则使用默认的硬编码知识
+        if not nutrition_docs:
+            nutrition_docs = [
+                Document(
+                    page_content="宏量营养素包括碳水化合物、蛋白质和脂肪，是身体能量的主要来源。",
+                    metadata={"category": "宏量营养素", "topic": "基础"},
+                ),
+                Document(
+                    page_content="蛋白质是构成肌肉、器官和酶的基础，对于生长和修复至关重要。",
+                    metadata={"category": "宏量营养素", "topic": "蛋白质"},
+                ),
+                Document(
+                    page_content="膳食纤维有助于肠道健康，能增加饱腹感，常见于蔬菜、水果和全谷物中。",
+                    metadata={"category": "其他营养素", "topic": "膳食纤维"},
+                ),
+            ]
+
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
         texts = text_splitter.split_documents(nutrition_docs)
 
@@ -193,6 +227,10 @@ class NutritionMythTool(BaseTool):
 #### 👍 实践建议
 * (针对这个误区，提供科学、可行的饮食或生活方式建议)
 * (如果该说法有部分正确性，说明在什么情况下适用)
+
+请确保回答科学准确、语言通俗易懂。
+合理使用表情符号和格式化来增强可读性。
+重要信息要突出显示，复杂概念要用简单语言解释。
 """,
         )
         self.myth_chain = self.myth_prompt | self.llm

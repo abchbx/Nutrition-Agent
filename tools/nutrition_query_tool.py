@@ -1,28 +1,26 @@
-import logging
+# 添加项目根目录到路径
 import os
 import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from typing import Any, Dict, Type
 
 import requests
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
 
-# 添加项目根目录到路径
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from config import NUTRITIONIX_API_URL, NUTRITIONIX_APP_ID, NUTRITIONIX_API_KEY
 from nutrition_database import NutritionDatabase
 
-# 配置日志
-logger = logging.getLogger(__name__)
+# Setup logger for nutrition_query_tool.py
+from config import agent_logger as logger  # Re-use agent logger or create a new one if needed
 
 
 class NutritionQueryInput(BaseModel):
     """营养成分查询工具输入模型"""
 
-    food_name: str = Field(
-        description="要查询的食物名称，可以是简单的食物，也可以是'一杯牛奶和两个鸡蛋'这样的自然语言描述"
-    )
+    food_name: str = Field(description="要查询的食物名称，可以是简单的食物，也可以是'一杯牛奶和两个鸡蛋'这样的自然语言描述")
     detailed: bool = Field(default=False, description="是否返回详细信息")
 
 
@@ -36,6 +34,7 @@ class NutritionQueryTool(BaseTool):
 
     def __init__(self, database: NutritionDatabase):
         super().__init__(database=database)
+        self.database = database
 
     def _run(self, food_name: str, detailed: bool = False) -> str:
         logger.info("开始查询食物营养信息: %s", food_name)
@@ -48,10 +47,23 @@ class NutritionQueryTool(BaseTool):
                 return self._format_local_nutrition_info(nutrition_info, detailed)
 
             # 如果本地找不到精确匹配，模糊搜索一下
-            search_results = self.database.search_nutrition(food_name, top_k=1)
-            if search_results and search_results[0]["food_name"] == food_name:
-                logger.info("通过模糊搜索找到 '%s'", food_name)
-                return self._format_local_nutrition_info(search_results[0], detailed)
+            search_results = self.database.search_nutrition(food_name, top_k=3)
+            if search_results:
+                # 检查是否有一个非常接近的匹配
+                for result in search_results:
+                    # 使用简单的字符串相似度检查
+                    if (
+                        result["food_name"].lower() == food_name.lower()
+                        or food_name.lower() in result["food_name"].lower()
+                        or result["food_name"].lower() in food_name.lower()
+                    ):
+                        logger.info("通过模糊搜索找到相似食物 '%s' 匹配查询 '%s'", result["food_name"], food_name)
+                        return self._format_local_nutrition_info(result, detailed)
+
+                # 如果没有精确或接近的匹配，返回最相似的结果供用户选择
+                logger.info("本地数据库未找到精确匹配，返回最相似的%d个结果", len(search_results))
+                similar_foods = [f"'{result['food_name']}'" for result in search_results]
+                return f"本地数据库中未找到'{food_name}'，您是否想查询: {', '.join(similar_foods)}？"
 
         except Exception as e:
             print(f"⚠️ 查询本地数据库时出错: {e}")
@@ -68,7 +80,8 @@ class NutritionQueryTool(BaseTool):
         data = {"query": food_name}
 
         try:
-            response = requests.post(NUTRITIONIX_API_URL, headers=headers, json=data)
+            # 添加超时设置
+            response = requests.post(NUTRITIONIX_API_URL, headers=headers, json=data, timeout=10)
             response.raise_for_status()  # 如果请求失败 (如 4xx or 5xx), 会抛出异常
             api_data = response.json()
             if api_data and "foods" in api_data and api_data["foods"]:
@@ -77,6 +90,9 @@ class NutritionQueryTool(BaseTool):
             else:
                 logger.info("通过 Nutritionix API 未能查询到 '%s' 的营养信息", food_name)
                 return f"抱歉，通过API也未能查询到 '{food_name}' 的营养信息。"
+        except requests.exceptions.Timeout:
+            logger.error("API 请求超时")
+            return "API 请求超时，请稍后再试。"
         except requests.exceptions.HTTPError as e:
             logger.error("API 请求失败: %s %s", e.response.status_code, e.response.text)
             return f"API 请求失败: {e.response.status_code} {e.response.text}"
@@ -162,9 +178,9 @@ class CategorySearchTool(BaseTool):
 
     def __init__(self, database: NutritionDatabase):
         super().__init__(database=database)
+        self.database = database
 
     def _run(self, category: str) -> str:
-        # ... (这部分代码无需修改) ...
         try:
             foods = self.database.get_foods_by_category(category)
             if not foods:
