@@ -1,0 +1,97 @@
+{
+    "user_id": "system_prompt_generator",
+    "name": "system_prompt_generator",
+    "age": 30,
+    "gender": "未知",
+    "height": 170.0,
+    "weight": 65.0,
+    "activity_level": "轻度活动",
+    "health_goal": "维持体重",
+    "dietary_restrictions": "无",
+    "preferences": "无",
+    "created_at": "2025-08-08T10:47:54.510868",
+    "updated_at": "2025-08-09T03:28:51.411727",
+    "consultations": [
+        {
+            "consultation_id": "system_prompt_generator_20250808_104757",
+            "user_id": "system_prompt_generator",
+            "date": "2025-08-08",
+            "question": "我的健康目标是'维持体重'。请为我这位营养助手的用户，生成3个简短、多样化且适合作为按钮示例的问题。请直接返回一个Python列表字符串，不要包含任何其他解释或代码块。例如: ['问题1', '问题2', '问题3']",
+            "answer": "\n\n['苹果的营养成分', '如何制定维持体重的饮食计划', '哪些食物适合减肥']",
+            "category": "general",
+            "created_at": "2025-08-08T10:47:57.880791"
+        },
+        {
+            "consultation_id": "system_prompt_generator_20250808_104806",
+            "user_id": "system_prompt_generator",
+            "date": "2025-08-08",
+            "question": "我的健康目标是'维持体重'。请为我这位营养助手的用户，生成3个简短、多样化且适合作为按钮示例的问题。请直接返回一个Python列表字符串，不要包含任何其他解释或代码块。例如: ['问题1', '问题2', '问题3']",
+            "answer": "\n\n['苹果的营养成分', '如何制定维持体重的饮食计划', '维持体重需要哪些营养素']",
+            "category": "general",
+            "created_at": "2025-08-08T10:48:06.157552"
+        },
+        {
+            "consultation_id": "system_prompt_generator_20250808_104814",
+            "user_id": "system_prompt_generator",
+            "date": "2025-08-08",
+            "question": "我的健康目标是'维持体重'。请为我这位营养助手的用户，生成3个简短、多样化且适合作为按钮示例的问题。请直接返回一个Python列表字符串，不要包含任何其他解释或代码块。例如: ['问题1', '问题2', '问题3']",
+            "answer": "\n\n['鸡胸肉的热量是多少', '每天应该喝多少水', '早餐吃什么最好']",
+            "category": "general",
+            "created_at": "2025-08-08T10:48:14.363990"
+        },
+        {
+            "consultation_id": "system_prompt_generator_20250808_105320",
+            "user_id": "system_prompt_generator",
+            "date": "2025-08-08",
+            "question": "我的健康目标是'维持体重'。请为我这位营养助手的用户，生成3个简短、多样化且适合作为按钮示例的问题。请直接返回一个Python列表字符串，不要包含任何其他解释或代码块。例如: ['问题1', '问题2', '问题3']",
+            "answer": "\n\n['如何计算每日所需热量', '哪些食物有助于维持体重', '运动对维持体重的影响']",
+            "category": "general",
+            "created_at": "2025-08-08T10:53:20.460098"
+        },
+        {
+            "consultation_id": "system_prompt_generator_20250808_105327",
+            "user_id": "system_prompt_generator",
+            "date": "2025-08-08",
+            "question": "我的健康目标是'维持体重'。请为我这位营养助手的用户，生成3个简短、多样化且适合作为按钮示例的问题。请直接返回一个Python列表字符串，不要包含任何其他解释或代码块。例如: ['问题1', '问题2', '问题3']",
+            "answer": "\n\n['鱼肉的热量', '维持体重需要多少运动', '健康油脂选择']",
+            "category": "general",
+            "created_at": "2025-08-08T10:53:27.080847"
+        },
+        {
+            "consultation_id": "system_prompt_generator_20250808_111226",
+            "user_id": "system_prompt_generator",
+            "date": "2025-08-08",
+            "question": "我的健康目标是'维持体重'。请为我这位营养助手的用户，生成3个简短、多样化且适合作为按钮示例的问题。请直接返回一个Python列表字符串，不要包含任何其他解释或代码块。例如: ['问题1', '问题2', '问题3']",
+            "answer": "\n\n['维生素D的食物来源', '晚餐吃什么不长胖', '间歇性断食有效吗']",
+            "category": "general",
+            "created_at": "2025-08-08T11:12:26.688911"
+        },
+        {
+            "consultation_id": "system_prompt_generator_20250808_112457",
+            "user_id": "system_prompt_generator",
+            "date": "2025-08-08",
+            "question": "我的健康目标是'维持体重'。请为我这位营养助手的用户，生成3个简短、多样化且适合作为按钮示例的问题。请直接返回一个Python列表字符串，不要包含任何其他解释或代码块。例如: ['问题1', '问题2', '问题3']",
+            "answer": "\n\n['全谷物对维持体重有什么好处', '如何控制食欲避免暴饮暴食', '蛋白质摄入量对体重维持的影响']",
+            "category": "general",
+            "created_at": "2025-08-08T11:24:57.875664"
+        },
+        {
+            "consultation_id": "system_prompt_generator_20250809_024426",
+            "user_id": "system_prompt_generator",
+            "date": "2025-08-09",
+            "question": "我的健康目标是'维持体重'。请为我这位营养助手的用户，生成3个简短、多样化且适合作为按钮示例的问题。请直接返回一个Python列表字符串，不要包含任何其他解释或代码块。例如: ['问题1', '问题2', '问题3']",
+            "answer": "['牛油果热量高吗', '如何健康吃零食', '维持体重早餐推荐']",
+            "category": "general",
+            "created_at": "2025-08-09T02:44:26.949459"
+        },
+        {
+            "consultation_id": "system_prompt_generator_20250809_032851",
+            "user_id": "system_prompt_generator",
+            "date": "2025-08-09",
+            "question": "我的健康目标是'维持体重'。请为我这位营养助手的用户，生成3个简短、多样化且适合作为按钮示例的问题。请直接返回一个Python列表字符串，不要包含任何其他解释或代码块。例如: ['问题1', '问题2', '问题3']",
+            "answer": "['维持体重每天该吃几餐', '哪些零食适合加餐不增重', '喝水能帮助控制体重吗']",
+            "category": "general",
+            "created_at": "2025-08-09T03:28:51.411727"
+        }
+    ]
+}

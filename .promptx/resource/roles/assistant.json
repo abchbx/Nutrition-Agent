@@ -1,0 +1,11 @@
+{
+  "id": "assistant",
+  "name": "Assistant",
+  "description": "A general-purpose assistant role.",
+  "protocol": "role",
+  "source": "project",
+  "version": "1.0.0",
+  "skills": [],
+  "knowledge": [],
+  "thought": []
+}
