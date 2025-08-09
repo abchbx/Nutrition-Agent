@@ -10,7 +10,7 @@
     "dietary_restrictions": "无",
     "preferences": "无",
     "created_at": "2025-08-08T10:47:54.510868",
-    "updated_at": "2025-08-09T06:15:30.880521",
+    "updated_at": "2025-08-09T07:03:21.977738",
     "consultations": [
         {
             "consultation_id": "system_prompt_generator_20250808_104757",
@@ -173,6 +173,35 @@
             "answer": "['维持体重期间可以吃全麦面包吗','每天摄入多少热量不会超标','无糖饮料会影响胰岛素吗','晚上饿了吃什么不长胖','如何判断自己是不是真饿']",
             "category": "general",
             "created_at": "2025-08-09T06:15:30.880521"
+        },
+        {
+            "consultation_id": "system_prompt_generator_20250809_062742",
+            "user_id": "system_prompt_generator",
+            "date": "2025-08-09",
+            "question": "我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。",
+            "answer": "['维持体重期间可以吃坚果吗','每天摄入多少碳水最稳能量','睡前两小时进食会胖吗','如何判断自己代谢是否变慢','外卖怎么点不超标']",
+            "category": "general",
+            "created_at": "2025-08-09T06:27:42.830440"
+        },
+        {
+            "consultation_id": "system_prompt_generator_20250809_063740",
+            "user_id": "system_prompt_generator",
+            "date": "2025-08-09",
+            "question": "我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。",
+            "answer": "['维持体重期间早餐吃鸡蛋还是燕麦','每天摄入多少脂肪最稳体重','运动完饿了吃什么不超标','下午喝咖啡会影响晚餐食欲吗','如何识别食物标签中的隐形糖']",
+            "category": "general",
+            "created_at": "2025-08-09T06:37:40.947263"
+        },
+        {
+            "consultation_id": "system_prompt_generator_20250809_070321",
+            "user_id": "system_prompt_generator",
+            "date": "2025-08-09",
+            "question": "我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。",
+            "answer": "['维持体重期间可以吃红薯吗','每天摄入多少钠不会水肿','聚餐后第二天怎么轻断食','下午三点加餐选什么不超标','睡前喝牛奶会影响体重吗']",
+            "category": "general",
+            "created_at": "2025-08-09T07:03:21.977738"
         }
-    ]
+    ],
+    "daily_logs": [],
+    "goals": []
 }

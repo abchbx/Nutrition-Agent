@@ -1,55 +1,62 @@
 # 🍎 营养师 Agent (Nutrition-Agent)
 
 Nutrition-Agent 是一个基于大型语言模型（LLM）的智能营养师助手。它能够根据您的个人身体数据和健康目标，提供个性化的饮食建议、回答营养学问题，并帮助您规划健康的饮食方案。
+它利用权威的 USDA 食品数据库，并结合动态用户健康档案，提供更精准、更个性化的服务。
 
 ## ✨ 主要功能
 
-  * **个性化用户档案**：为每位用户创建并管理独立的健康档案，包含年龄、身高、体重、健康目标、饮食偏好等信息。
-  * **食物营养查询**：快速查询各种食物的详细营养成分，包括热量、蛋白质、维生素等。
-  * **智能饮食建议**：根据用户的个人档案和具体目标（如减肥、增肌、改善健康），生成科学、可行的饮食方案。
-  * **膳食计划生成**：为特定餐食（早餐、午餐、晚餐）或加餐提供具体的食物搭配建议。
-  * **营养知识问答**：回答专业的营养学问题，例如各种营养素的功能、健康饮食原则等。
-  * **营养误区辨析**：针对常见的"伪科学"和流行说法，提供科学的分析和澄清。
-  * **对话式交互**：拥有对话记忆功能，能够理解上下文，提供连贯、流畅的交互体验。
+*   **个性化用户档案**：为每位用户创建并管理独立的健康档案，包含年龄、身高、体重、健康目标、饮食偏好等信息。
+*   **动态健康日志 (新增)**：用户可以记录每日饮食，Agent 会累计营养摄入，并生成周报/月报进行分析和建议。
+*   **权威食物营养查询 (已升级)**：利用美国农业部 (USDA) FoodData Central API 查询权威、准确的食物营养成分，包括热量、蛋白质、维生素等。本地数据库作为后备。
+*   **智能饮食建议**：根据用户的个人档案和具体目标（如减肥、增肌、改善健康），生成科学、可行的饮食方案。
+*   **膳食计划生成**：为特定餐食（早餐、午餐、晚餐）或加餐提供具体的食物搭配建议。
+*   **营养知识问答**：回答专业的营养学问题，例如各种营养素的功能、健康饮食原则等。
+*   **营养误区辨析**：针对常见的"伪科学"和流行说法，提供科学的分析和澄清。
+*   **对话式交互**：拥有对话记忆功能，能够理解上下文，提供连贯、流畅的交互体验。
 
 ## 🛠️ 技术栈
 
-  * **核心框架**：LangChain
-  * **前端界面**：Streamlit
-  * **语言模型 (LLM)**：支持 ZhipuAI/GLM-4.5, glm-4-flash 等模型
-  * **向量数据库**：FAISS (Facebook AI Similarity Search)
-  * **词向量模型**：BAAI/bge-large-zh-v1.5 (用于文本向量化)
-  * **数据处理**：Pandas, NumPy
+*   **核心框架**：LangChain
+*   **前端界面**：Streamlit
+*   **语言模型 (LLM)**：支持 ZhipuAI/GLM-4.5, glm-4-flash 等模型
+*   **向量数据库**：FAISS (Facebook AI Similarity Search)
+*   **词向量模型**：BAAI/bge-large-zh-v1.5 (用于文本向量化)
+*   **数据处理**：Pandas, NumPy
+*   **外部数据源**：USDA FoodData Central API (主要), Nutritionix API (后备)
 
 ## 📂 项目结构
 
 ```
 Nutrition-Agent/
 ├── data/
-│   ├── nutrition_data.csv         # 营养成分数据
-│   └── faiss_index/               # FAISS 向量索引
+│   ├── nutrition_data.csv              # 本地营养成分数据 (后备)
+│   └── faiss_index/                    # FAISS 向量索引
 ├── tools/
-│   ├── diet_advice_tool.py        # 饮食建议工具
-│   ├── nutrition_qa_tool.py       # 营养问答工具
-│   └── nutrition_query_tool.py    # 食物查询工具
+│   ├── diet_advice_tool.py             # 饮食建议工具
+│   ├── nutrition_qa_tool.py            # 营养问答工具
+│   ├── nutrition_query_tool.py         # 食物查询工具 (后备)
+│   ├── usda_food_search_tool.py        # USDA 食物查询工具 (首选)
+│   ├── daily_log_tool.py               # 每日饮食记录工具
+│   └── report_generation_tool.py       # 周报/月报生成工具 (框架)
 ├── user_profiles/
-│   └── user_xxx.json              # 用户个人档案
-├── .env                           # 环境变量配置 (请勿提交)
-├── .env.example                   # 环境变量配置模板
-├── app.py                         # Streamlit 前端应用
-├── config.py                      # 项目配置加载
-├── nutrition_agent.py             # Agent 核心逻辑
-├── nutrition_database.py          # 营养数据库管理
-├── requirements.txt               # Python 依赖包
-└── README.md                      # 项目说明文档
+│   └── user_xxx.json                   # 用户个人及健康日志档案
+├── .env                                # 环境变量配置 (请勿提交)
+├── .env.example                        # 环境变量配置模板
+├── app.py                              # Streamlit 前端应用
+├── config.py                           # 项目配置加载
+├── nutrition_agent.py                  # Agent 核心逻辑
+├── nutrition_database.py               # 营养数据库管理
+├── user_memory.py                      # 用户档案与日志管理
+├── requirements.txt                    # Python 依赖包
+└── README.md                           # 项目说明文档
 ```
 
 ## 🚀 快速开始
 
 ### 1\. 环境准备
 
-  * 确保您已安装 Python 3.9 或更高版本。
-  * (推荐) 创建并激活一个虚拟环境：
+*   确保您已安装 Python 3.9 或更高版本。
+*   (推荐) 创建并激活一个虚拟环境：
     ```bash
     python -m venv venv
     source venv/bin/activate  # on Windows, use `venv\Scripts\activate`
@@ -80,15 +87,23 @@ pip install -r requirements.txt
     # OpenAI 或兼容的 API 配置
     OPENAI_API_KEY="sk-your_api_key_here"
     OPENAI_BASE_URL="https://api-inference.modelscope.cn/v1" # 根据您的服务商修改
+
+    # USDA API 配置 (推荐，用于权威营养查询)
+    USDA_API_KEY="<YOUR_USDA_API_KEY>"
+
+    # Nutritionix API 配置 (可选，作为后备)
     NUTRITIONIX_API_URL="https://trackapi.nutritionix.com/v2/natural/nutrients"
     NUTRITIONIX_APP_ID="<YOUR_APP_ID>"
     NUTRITIONIX_API_KEY="<YOUR_API_KEY>"
+
     # Agent 模型配置
     AGENT_MODEL=ZhipuAI/GLM-4.5
     # ... 其他配置保持默认即可
     ```
 
-    > **注意**: `OPENAI_BASE_URL` 需要指向您使用的语言模型服务商的 API 端点。
+    > **注意**:
+    > `OPENAI_BASE_URL` 需要指向您使用的语言模型服务商的 API 端点。
+    > `USDA_API_KEY` 是推荐配置项，用于启用基于 USDA 的权威食物营养查询。您可以从 https://fdc.nal.usda.gov/api-key-signup.html 免费获取。
 
 ### 5\. 运行应用
 
@@ -100,42 +115,16 @@ streamlit run app.py
 
 应用启动后，浏览器将自动打开一个新标签页，您就可以开始与您的专属营养师 Agent 互动了！
 
-## 🧪 测试
-
-项目包含单元测试，可以使用 pytest 运行：
-
-```bash
-# 安装测试依赖
-pip install pytest
-
-# 运行所有测试
-pytest
-
-# 运行特定测试文件
-pytest tests/test_nutrition_agent.py
-```
-
-## 📊 代码质量
-
-项目使用 black 进行代码格式化，使用 flake8 进行 linting：
-
-```bash
-# 安装依赖
-pip install black flake8
-
-# 格式化代码
-black .
-
-# 检查代码风格
-flake8 .
-```
 
 ## 💡 工作流简介
 
-1.  **用户交互**：用户在 Streamlit 构建的前端界面输入问题或更新个人档案。
+1.  **用户交互**：用户在 Streamlit 构建的前端界面输入问题、更新个人档案或记录每日饮食。
 2.  **Agent 接收**：`nutrition_agent.py` 中的 `NutritionAgent` 接收到请求，并加载用户的历史对话和档案信息。
-3.  **意图判断与工具选择**：Agent (LLM) 分析用户的输入，判断其意图，并决定调用哪个或哪些工具（如查询食物、生成建议等）。
-4.  **工具执行**：被选中的工具（例如 `NutritionQueryTool`）会执行具体任务，可能会与 FAISS 向量数据库或用户档案进行交互。
+3.  **意图判断与工具选择**：Agent (LLM) 分析用户的输入，判断其意图，并根据系统提示 (`system_prompt.md`) 决定调用哪个或哪些工具（如查询食物、记录日志、生成建议等）。
+4.  **工具执行**：
+    *   对于食物营养查询，优先调用 `usda_food_search_tool` 获取 USDA 权威数据。
+    *   对于记录饮食，调用 `daily_log_tool` 将信息存入用户档案。
+    *   其他工具（如饮食建议、问答）按需调用。
 5.  **结果整合与生成回复**：Agent (LLM) 将工具返回的结果整合起来，并结合对话上下文，生成一段自然、流畅的回复。
 6.  **展示给用户**：最终的回复通过 Streamlit 界面展示给用户，并保存到对话历史中。
 

@@ -12,13 +12,14 @@ def load_agent():
 
 # ------------- 生成示例问题（已修复正则 & 变量） -------------
 @st.cache_data
-def generate_example_prompts(_user_profile, _refresh_counter=0):
+def generate_example_prompts(_user_id, _refresh_counter=0):
     try:
-        health_goal = _user_profile.health_goal if _user_profile else "改善健康"
+        agent = load_agent()
+        profile = agent.get_user_profile(_user_id)
+        health_goal = profile.health_goal if profile else "改善健康"
         meta_prompt = (
             f"我的健康目标是'{health_goal}'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。" "直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。"
         )
-        agent = load_agent()
         response = agent.chat("system_prompt_generator", meta_prompt)
 
         # 1) 先尝试 JSON
@@ -55,7 +56,7 @@ def render_sidebar(agent, current_user_id):
 
         def on_user_change():
             st.session_state.messages = []
-            generate_example_prompts.clear()
+            # generate_example_prompts.clear() # 不再需要手动清除，由缓存键自动处理
 
         user_id = st.selectbox(
             "切换用户", user_ids, index=user_ids.index(current_user_id), on_change=on_user_change, key="uid_selector"
@@ -84,7 +85,8 @@ def render_chat_interface(profile):
     # 示例问题
     if "example_refresh_counter" not in st.session_state:
         st.session_state.example_refresh_counter = 0
-    prompts = generate_example_prompts(profile, st.session_state.example_refresh_counter)
+    # 传递 user_id 而不是 profile 对象
+    prompts = generate_example_prompts(st.session_state.user_id, st.session_state.example_refresh_counter)
 
     # 限制只显示3个示例问题
     display_prompts = prompts[:3] if prompts else []
@@ -103,8 +105,7 @@ def render_chat_interface(profile):
         # 刷新按钮与示例问题按钮宽度对齐
         if st.button("🔄 刷新示例", key="refresh_examples", use_container_width=True):
             st.session_state.example_refresh_counter += 1
-            # 清除缓存以生成新的示例
-            generate_example_prompts.clear()
+            # 不再需要手动清除缓存 generate_example_prompts.clear()
             st.rerun()
 
 

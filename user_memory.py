@@ -10,6 +10,35 @@ from config import USER_DATA_PATH
 from config import memory_logger as logger
 
 
+# --- 新增的数据模型 ---
+
+class DailyLogEntry(BaseModel):
+    """单条饮食记录条目"""
+    food_name: str
+    amount: float # 数量
+    unit: str    # 单位 (e.g., "g", "杯", "个")
+    calories: Optional[float] = None
+    protein: Optional[float] = None
+    carbs: Optional[float] = None
+    fat: Optional[float] = None
+    # 可以根据需要添加更多营养素字段
+
+class DailyLog(BaseModel):
+    """某一天的饮食记录"""
+    date: str # YYYY-MM-DD
+    entries: List[DailyLogEntry] = Field(default_factory=list)
+    # total_nutrition 可以实时计算，也可以存储
+
+class Goal(BaseModel):
+    """用户健康目标"""
+    goal_id: str
+    description: str
+    target_value: float # 目标值 (e.g., -2.0 for weight loss of 2kg)
+    unit: str # 单位 (e.g., "kg", "%")
+    start_date: str # YYYY-MM-DD
+    target_date: str # YYYY-MM-DD
+    status: str = "active" # "active", "achieved", "failed", "cancelled"
+
 class UserProfile(BaseModel):
     user_id: str
     name: str
@@ -24,8 +53,12 @@ class UserProfile(BaseModel):
     created_at: str
     updated_at: str
     consultations: List[Dict[str, Any]] = Field(default_factory=list)
+    # --- 新增字段 ---
+    daily_logs: List[DailyLog] = Field(default_factory=list)
+    goals: List[Goal] = Field(default_factory=list)
+    # reports: List[Dict[str, Any]] = Field(default_factory=list) # 可选：存储报告摘要
 
-
+# --- 保留原有的 ConsultationRecord 模型 ---
 class ConsultationRecord(BaseModel):
     consultation_id: str
     user_id: str
@@ -52,12 +85,15 @@ class UserMemory:
         try:
             with open(filepath, "r", encoding="utf-8") as f:
                 user_data = json.load(f)
-                # Ensure 'consultations' field exists
+                # Ensure old fields exist for backward compatibility
                 user_data.setdefault("consultations", [])
-                # Ensure 'created_at' and 'updated_at' fields exist
                 now_iso = datetime.now().isoformat()
                 user_data.setdefault("created_at", now_iso)
                 user_data.setdefault("updated_at", now_iso)
+                # Ensure new fields exist for backward compatibility
+                user_data.setdefault("daily_logs", [])
+                user_data.setdefault("goals", [])
+                # user_data.setdefault("reports", []) # 可选
 
                 # Use Pydantic model's parse_obj method for robust deserialization
                 return UserProfile.parse_obj(user_data)
@@ -100,6 +136,10 @@ class UserMemory:
             "created_at": now,
             "updated_at": now,
             "consultations": [],
+            # --- 初始化新增字段 ---
+            "daily_logs": [],
+            "goals": [],
+            # "reports": [], # 可选
         }
         try:
             # Use Pydantic model for validation
@@ -125,7 +165,7 @@ class UserMemory:
         # Update fields dynamically
         update_data = profile.dict()  # Convert to dict for easy updating
         for key, value in kwargs.items():
-            if key in update_data:  # Only update existing fields
+            if key in update_data:  # Only update existing fields in the original model
                 update_data[key] = value
 
         update_data["updated_at"] = datetime.now().isoformat()
@@ -177,3 +217,126 @@ class UserMemory:
             return True
         logger.error("添加咨询记录到用户 %s 的档案中失败", user_id)
         return False
+    
+    # --- 新增方法用于管理动态健康日志 ---
+
+    def _get_or_create_daily_log(self, profile: UserProfile, date_str: str) -> DailyLog:
+        """获取或创建指定日期的 DailyLog 对象"""
+        for log in profile.daily_logs:
+            if log.date == date_str:
+                return log
+        # 如果没有找到，创建一个新的
+        new_log = DailyLog(date=date_str)
+        profile.daily_logs.append(new_log)
+        # 为了保持日期顺序（可选但推荐），可以进行排序
+        profile.daily_logs.sort(key=lambda x: x.date)
+        return new_log
+
+    def add_daily_log_entry(self, user_id: str, date_str: str, food_entry_data: Dict[str, Any]) -> bool:
+        """为用户添加一条每日饮食记录"""
+        profile = self.get_user_profile(user_id)
+        if not profile:
+            logger.warning("尝试为不存在的用户 %s 添加饮食记录。", user_id)
+            return False
+
+        try:
+            # 验证食物条目数据
+            food_entry = DailyLogEntry(**food_entry_data)
+        except Exception as e:
+            logger.error(f"创建饮食记录条目时数据验证失败: {e}")
+            return False
+
+        # 获取或创建当天的 DailyLog
+        daily_log = self._get_or_create_daily_log(profile, date_str)
+        
+        # 添加条目
+        daily_log.entries.append(food_entry)
+        
+        # 更新档案修改时间
+        profile.updated_at = datetime.now().isoformat()
+
+        # 保存档案
+        if self._save_user_profile(profile):
+            logger.info("成功为用户 %s 在 %s 添加饮食记录条目: %s", user_id, date_str, food_entry.food_name)
+            return True
+        logger.error("为用户 %s 添加饮食记录条目失败", user_id)
+        return False
+
+    def get_daily_logs_for_period(self, user_id: str, start_date_str: str, end_date_str: str) -> Optional[List[DailyLog]]:
+        """获取用户在指定日期范围内的所有饮食日志"""
+        profile = self.get_user_profile(user_id)
+        if not profile:
+            logger.warning("尝试获取不存在的用户 %s 的饮食记录。", user_id)
+            return None
+        
+        # 过滤出日期范围内的日志
+        filtered_logs = [
+            log for log in profile.daily_logs 
+            if start_date_str <= log.date <= end_date_str
+        ]
+        # 按日期排序
+        filtered_logs.sort(key=lambda x: x.date)
+        return filtered_logs
+
+    def set_user_goal(self, user_id: str, goal_data: Dict[str, Any]) -> bool:
+        """为用户设置一个新的健康目标"""
+        profile = self.get_user_profile(user_id)
+        if not profile:
+            logger.warning("尝试为不存在的用户 %s 设置健康目标。", user_id)
+            return False
+
+        # 生成一个唯一的 goal_id
+        goal_id = f"{user_id}_goal_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        goal_data["goal_id"] = goal_id
+
+        try:
+            # 验证目标数据
+            goal = Goal(**goal_data)
+        except Exception as e:
+            logger.error(f"创建健康目标时数据验证失败: {e}")
+            return False
+        
+        # 添加目标
+        profile.goals.append(goal)
+        
+        # 更新档案修改时间
+        profile.updated_at = datetime.now().isoformat()
+
+        # 保存档案
+        if self._save_user_profile(profile):
+            logger.info("成功为用户 %s 设置健康目标: %s", user_id, goal.description)
+            return True
+        logger.error("为用户 %s 设置健康目标失败", user_id)
+        return False
+
+    def update_goal_status(self, user_id: str, goal_id: str, new_status: str) -> bool:
+        """更新用户某个健康目标的状态"""
+        profile = self.get_user_profile(user_id)
+        if not profile:
+            logger.warning("尝试更新不存在的用户 %s 的健康目标。", user_id)
+            return False
+        
+        goal_found = False
+        for goal in profile.goals:
+            if goal.goal_id == goal_id:
+                goal.status = new_status
+                goal_found = True
+                break
+        
+        if not goal_found:
+            logger.warning("未找到用户 %s 的目标 ID: %s", user_id, goal_id)
+            return False
+
+        # 更新档案修改时间
+        profile.updated_at = datetime.now().isoformat()
+
+        # 保存档案
+        if self._save_user_profile(profile):
+            logger.info("成功更新用户 %s 的目标 %s 状态为 %s", user_id, goal_id, new_status)
+            return True
+        logger.error("更新用户 %s 的目标 %s 状态失败", user_id, goal_id)
+        return False
+
+    # --- 可选：添加报告摘要存储方法 ---
+    # def add_report_summary(self, user_id: str, report_data: Dict[str, Any]) -> bool:
+    #     ... (实现逻辑类似上面的方法)

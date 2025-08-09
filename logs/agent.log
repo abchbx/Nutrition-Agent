@@ -63,3 +63,35 @@
 2025-08-09 06:15:13,894 - nutrition_agent - INFO - nutrition_agent.py:40 - Embedding模型加载完成!
 2025-08-09 06:15:26,296 - nutrition_agent - INFO - nutrition_agent.py:47 - 营养学Agent初始化完成!
 2025-08-09 06:15:26,304 - nutrition_agent - INFO - nutrition_agent.py:152 - 用户 system_prompt_generator 发送消息: 我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。
+2025-08-09 06:27:14,880 - nutrition_agent - INFO - nutrition_agent.py:37 - 开始初始化营养学Agent...
+2025-08-09 06:27:14,880 - nutrition_agent - INFO - nutrition_agent.py:39 - 正在加载共享的Embedding模型...
+2025-08-09 06:27:26,066 - nutrition_agent - INFO - nutrition_agent.py:42 - Embedding模型加载完成!
+2025-08-09 06:27:37,794 - nutrition_agent - INFO - nutrition_agent.py:49 - 营养学Agent初始化完成!
+2025-08-09 06:27:37,800 - nutrition_agent - INFO - nutrition_agent.py:154 - 用户 system_prompt_generator 发送消息: 我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。
+2025-08-09 06:27:42,831 - nutrition_agent - INFO - nutrition_agent.py:190 - 用户 system_prompt_generator 的问题已处理完成
+2025-08-09 06:27:47,956 - nutrition_agent - INFO - nutrition_agent.py:154 - 用户 user_001 发送消息: 你好
+2025-08-09 06:27:55,999 - nutrition_agent - INFO - nutrition_agent.py:190 - 用户 user_001 的问题已处理完成
+2025-08-09 06:28:37,928 - nutrition_agent - INFO - nutrition_agent.py:154 - 用户 user_001 发送消息: 蛋白质的功能
+2025-08-09 06:29:29,853 - nutrition_agent - INFO - nutrition_agent.py:190 - 用户 user_001 的问题已处理完成
+2025-08-09 06:31:49,093 - nutrition_agent - INFO - nutrition_agent.py:154 - 用户 user_001 发送消息: 苹果的营养成分
+2025-08-09 06:31:56,891 - nutrition_agent - INFO - nutrition_query_tool.py:40 - 开始查询食物营养信息: 苹果
+2025-08-09 06:31:56,893 - nutrition_agent - INFO - nutrition_query_tool.py:46 - 在本地数据库中找到 '苹果'
+2025-08-09 06:32:22,031 - nutrition_agent - INFO - nutrition_agent.py:190 - 用户 user_001 的问题已处理完成
+2025-08-09 06:37:13,218 - nutrition_agent - INFO - nutrition_agent.py:37 - 开始初始化营养学Agent...
+2025-08-09 06:37:13,218 - nutrition_agent - INFO - nutrition_agent.py:39 - 正在加载共享的Embedding模型...
+2025-08-09 06:37:24,580 - nutrition_agent - INFO - nutrition_agent.py:42 - Embedding模型加载完成!
+2025-08-09 06:37:35,299 - nutrition_agent - INFO - nutrition_agent.py:49 - 营养学Agent初始化完成!
+2025-08-09 06:37:35,310 - nutrition_agent - INFO - nutrition_agent.py:154 - 用户 system_prompt_generator 发送消息: 我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。
+2025-08-09 06:37:40,948 - nutrition_agent - INFO - nutrition_agent.py:190 - 用户 system_prompt_generator 的问题已处理完成
+2025-08-09 06:37:45,433 - nutrition_agent - INFO - nutrition_agent.py:154 - 用户 user_001 发送消息: 水的重要性
+2025-08-09 06:38:15,717 - nutrition_agent - INFO - nutrition_agent.py:190 - 用户 user_001 的问题已处理完成
+2025-08-09 07:02:54,346 - nutrition_agent - INFO - nutrition_agent.py:40 - 开始初始化营养学Agent...
+2025-08-09 07:02:54,346 - nutrition_agent - INFO - nutrition_agent.py:42 - 正在加载共享的Embedding模型...
+2025-08-09 07:03:05,575 - nutrition_agent - INFO - nutrition_agent.py:45 - Embedding模型加载完成!
+2025-08-09 07:03:16,685 - nutrition_agent - INFO - nutrition_agent.py:52 - 营养学Agent初始化完成!
+2025-08-09 07:03:16,693 - nutrition_agent - INFO - nutrition_agent.py:160 - 用户 system_prompt_generator 发送消息: 我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。
+2025-08-09 07:03:21,982 - nutrition_agent - INFO - nutrition_agent.py:196 - 用户 system_prompt_generator 的问题已处理完成
+2025-08-09 07:03:29,873 - nutrition_agent - INFO - nutrition_agent.py:160 - 用户 user_001 发送消息: 火龙果的营养成分
+2025-08-09 07:03:57,716 - nutrition_agent - INFO - nutrition_agent.py:196 - 用户 user_001 的问题已处理完成
+2025-08-09 07:06:01,933 - nutrition_agent - INFO - nutrition_agent.py:160 - 用户 user_001 发送消息: 聚餐后第二天怎么轻断食
+2025-08-09 07:06:39,240 - nutrition_agent - INFO - nutrition_agent.py:196 - 用户 user_001 的问题已处理完成

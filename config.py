@@ -70,5 +70,11 @@ USER_DATA_PATH = os.getenv("USER_DATA_PATH", "./user_profiles")
 NUTRITIONIX_API_URL = os.getenv("NUTRITIONIX_API_URL", "https://trackapi.nutritionix.com/v2/natural/nutrients")
 NUTRITIONIX_APP_ID = os.getenv("NUTRITIONIX_APP_ID")
 NUTRITIONIX_API_KEY = os.getenv("NUTRITIONIX_API_KEY")
+# USDA API 配置
+USDA_API_KEY = os.getenv("USDA_API_KEY")
+USDA_API_BASE_URL = "https://api.nal.usda.gov/fdc/v1"
+if not USDA_API_KEY:
+    config_logger.warning("USDA_API_KEY environment variable is not set. USDA food search tool will not function.")
+
 # 日志配置
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")

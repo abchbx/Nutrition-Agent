@@ -44,3 +44,23 @@
 2025-08-09 05:42:03,670 - user_memory - INFO - user_memory.py:178 - 成功添加咨询记录到用户 user_001 的档案中
 2025-08-09 06:15:30,881 - user_memory - INFO - user_memory.py:76 - 成功保存用户档案: ./user_profiles/system_prompt_generator.json
 2025-08-09 06:15:30,882 - user_memory - INFO - user_memory.py:176 - 成功添加咨询记录到用户 system_prompt_generator 的档案中
+2025-08-09 06:22:25,833 - user_memory - INFO - user_memory.py:76 - 成功保存用户档案: ./user_profiles/user_001.json
+2025-08-09 06:22:25,833 - user_memory - INFO - user_memory.py:176 - 成功添加咨询记录到用户 user_001 的档案中
+2025-08-09 06:27:42,831 - user_memory - INFO - user_memory.py:76 - 成功保存用户档案: ./user_profiles/system_prompt_generator.json
+2025-08-09 06:27:42,831 - user_memory - INFO - user_memory.py:176 - 成功添加咨询记录到用户 system_prompt_generator 的档案中
+2025-08-09 06:27:55,999 - user_memory - INFO - user_memory.py:76 - 成功保存用户档案: ./user_profiles/user_001.json
+2025-08-09 06:27:55,999 - user_memory - INFO - user_memory.py:176 - 成功添加咨询记录到用户 user_001 的档案中
+2025-08-09 06:29:29,852 - user_memory - INFO - user_memory.py:76 - 成功保存用户档案: ./user_profiles/user_001.json
+2025-08-09 06:29:29,853 - user_memory - INFO - user_memory.py:176 - 成功添加咨询记录到用户 user_001 的档案中
+2025-08-09 06:32:22,030 - user_memory - INFO - user_memory.py:76 - 成功保存用户档案: ./user_profiles/user_001.json
+2025-08-09 06:32:22,031 - user_memory - INFO - user_memory.py:176 - 成功添加咨询记录到用户 user_001 的档案中
+2025-08-09 06:37:40,948 - user_memory - INFO - user_memory.py:76 - 成功保存用户档案: ./user_profiles/system_prompt_generator.json
+2025-08-09 06:37:40,948 - user_memory - INFO - user_memory.py:176 - 成功添加咨询记录到用户 system_prompt_generator 的档案中
+2025-08-09 06:38:15,716 - user_memory - INFO - user_memory.py:76 - 成功保存用户档案: ./user_profiles/user_001.json
+2025-08-09 06:38:15,716 - user_memory - INFO - user_memory.py:176 - 成功添加咨询记录到用户 user_001 的档案中
+2025-08-09 07:03:21,978 - user_memory - INFO - user_memory.py:112 - 成功保存用户档案: ./user_profiles/system_prompt_generator.json
+2025-08-09 07:03:21,982 - user_memory - INFO - user_memory.py:216 - 成功添加咨询记录到用户 system_prompt_generator 的档案中
+2025-08-09 07:03:57,715 - user_memory - INFO - user_memory.py:112 - 成功保存用户档案: ./user_profiles/user_001.json
+2025-08-09 07:03:57,716 - user_memory - INFO - user_memory.py:216 - 成功添加咨询记录到用户 user_001 的档案中
+2025-08-09 07:06:39,239 - user_memory - INFO - user_memory.py:112 - 成功保存用户档案: ./user_profiles/user_001.json
+2025-08-09 07:06:39,240 - user_memory - INFO - user_memory.py:216 - 成功添加咨询记录到用户 user_001 的档案中

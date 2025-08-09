@@ -22,6 +22,9 @@ from nutrition_database import NutritionDatabase
 from tools.diet_advice_tool import DietAdviceTool, MealPlanTool
 from tools.nutrition_qa_tool import NutritionMythTool, NutritionQATool
 from tools.nutrition_query_tool import CategorySearchTool, NutritionQueryTool
+from tools.usda_food_search_tool import USDAFoodSearchTool # 导入新工具
+from tools.daily_log_tool import DailyLogTool # 导入新工具
+from tools.report_generation_tool import ReportGenerationTool # 导入新工具
 from user_memory import UserMemory
 
 # UserProfile is now a Pydantic model, import it correctly
@@ -57,6 +60,9 @@ class NutritionAgent:
             MealPlanTool(self.database),
             NutritionQATool(embeddings=self.embeddings),
             NutritionMythTool(),
+            USDAFoodSearchTool(), # 添加新工具
+            DailyLogTool(), # 添加新工具
+            ReportGenerationTool(), # 添加新工具
         ]
         return tools
 
