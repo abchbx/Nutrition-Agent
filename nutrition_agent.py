@@ -154,6 +154,10 @@ class NutritionAgent:
         """获取完整的UserProfile对象"""
         return self.memory.get_user_profile(user_id)
 
+    def update_user_profile(self, user_id: str, **kwargs) -> bool:
+        """更新用户档案"""
+        return self.memory.update_user_profile(user_id, **kwargs)
+
     def chat(self, user_id: str, message: str) -> str:
         """与用户进行有记忆的对话"""
         try:
