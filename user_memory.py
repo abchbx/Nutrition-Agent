@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator # <-- 添加 validator 导入
 from config import USER_DATA_PATH
 
 # Setup logger for user_memory.py
@@ -42,10 +42,10 @@ class Goal(BaseModel):
 class UserProfile(BaseModel):
     user_id: str
     name: str
-    age: int
+    age: int = Field(..., ge=1, le=120, description="年龄必须在1到120岁之间")
     gender: str
-    height: float
-    weight: float
+    height: float = Field(..., gt=0, le=300, description="身高必须大于0且小于等于300厘米")
+    weight: float = Field(..., gt=0, le=500, description="体重必须大于0且小于等于500公斤")
     activity_level: str
     health_goal: str
     dietary_restrictions: str
@@ -57,6 +57,20 @@ class UserProfile(BaseModel):
     daily_logs: List[DailyLog] = Field(default_factory=list)
     goals: List[Goal] = Field(default_factory=list)
     # reports: List[Dict[str, Any]] = Field(default_factory=list) # 可选：存储报告摘要
+
+    @validator('gender')
+    def validate_gender(cls, v):
+        allowed_genders = ["男", "女", "其他"]
+        if v not in allowed_genders:
+            raise ValueError(f'性别必须是 {", ".join(allowed_genders)} 中的一个')
+        return v
+
+    @validator('activity_level')
+    def validate_activity_level(cls, v):
+        allowed_levels = ["久坐", "轻度活动", "中度活动", "重度活动"]
+        if v not in allowed_levels:
+            raise ValueError(f'活动水平必须是 {", ".join(allowed_levels)} 中的一个')
+        return v
 
 # --- 保留原有的 ConsultationRecord 模型 ---
 class ConsultationRecord(BaseModel):
@@ -155,7 +169,31 @@ class UserMemory:
         logger.error("创建用户档案失败: %s", user_id)
         return False
 
+    def update_user_field(self, user_id: str, field_name: str, new_value: Any) -> bool:
+        """更新用户档案中的单个字段"""
+        profile = self.get_user_profile(user_id)
+        if not profile:
+            logger.warning("尝试更新不存在的用户 %s 的字段 %s。", user_id, field_name)
+            return False
+
+        # 检查字段是否存在于模型定义中
+        if field_name not in profile.__fields__:
+            logger.warning("用户档案模型中不存在字段 '%s'。", field_name)
+            return False
+
+        # 更新字段
+        try:
+            setattr(profile, field_name, new_value)
+            profile.updated_at = datetime.now().isoformat()
+            
+            # 保存更新后的档案
+            return self._save_user_profile(profile)
+        except Exception as e:
+            logger.error(f"更新用户 {user_id} 的字段 {field_name} 时发生错误: {e}")
+            return False
+
     def update_user_profile(self, user_id: str, **kwargs) -> bool:
+        """更新用户档案（向后兼容）"""
         profile = self.get_user_profile(user_id)
         if not profile:
             # 如果档案不存在，直接尝试创建
@@ -165,7 +203,7 @@ class UserMemory:
         # Update fields dynamically
         update_data = profile.dict()  # Convert to dict for easy updating
         for key, value in kwargs.items():
-            if key in update_data:  # Only update existing fields in the original model
+            if key in update_data:  # Only update existing fields
                 update_data[key] = value
 
         update_data["updated_at"] = datetime.now().isoformat()

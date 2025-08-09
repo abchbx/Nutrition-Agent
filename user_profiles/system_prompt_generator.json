@@ -10,7 +10,7 @@
     "dietary_restrictions": "无",
     "preferences": "无",
     "created_at": "2025-08-08T10:47:54.510868",
-    "updated_at": "2025-08-09T07:03:21.977738",
+    "updated_at": "2025-08-09T07:23:35.390287",
     "consultations": [
         {
             "consultation_id": "system_prompt_generator_20250808_104757",
@@ -200,6 +200,15 @@
             "answer": "['维持体重期间可以吃红薯吗','每天摄入多少钠不会水肿','聚餐后第二天怎么轻断食','下午三点加餐选什么不超标','睡前喝牛奶会影响体重吗']",
             "category": "general",
             "created_at": "2025-08-09T07:03:21.977738"
+        },
+        {
+            "consultation_id": "system_prompt_generator_20250809_072335",
+            "user_id": "system_prompt_generator",
+            "date": "2025-08-09",
+            "question": "我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。",
+            "answer": "\n\n['维持体重期间可以吃香蕉吗','每天喝多少水有助于代谢','压力大会导致体重增加吗','月经期间如何控制体重','吃火锅怎么点菜不超标']",
+            "category": "general",
+            "created_at": "2025-08-09T07:23:35.390287"
         }
     ],
     "daily_logs": [],

@@ -12,6 +12,8 @@ from pydantic import BaseModel, Field
 
 from config import NUTRITIONIX_API_URL, NUTRITIONIX_APP_ID, NUTRITIONIX_API_KEY
 from nutrition_database import NutritionDatabase
+# 导入 USDA 工具
+from tools.usda_food_search_tool import _search_food_nutrition_structured
 
 # Setup logger for nutrition_query_tool.py
 from config import agent_logger as logger  # Re-use agent logger or create a new one if needed
@@ -28,7 +30,7 @@ class NutritionQueryTool(BaseTool):
     """营养成分查询工具"""
 
     name: str = "nutrition_query_tool"
-    description: str = "查询食物的营养成分信息。优先查询本地数据库，如果找不到，则会尝试调用外部API进行自然语言查询。"
+    description: str = "查询食物的营养成分信息。优先调用 USDA FoodData Central API 获取权威数据，如果查询失败则查询本地数据库，最后回退到调用 Nutritionix API 进行自然语言查询。"
     args_schema: Type[BaseModel] = NutritionQueryInput
     database: Any
 
@@ -38,7 +40,22 @@ class NutritionQueryTool(BaseTool):
 
     def _run(self, food_name: str, detailed: bool = False) -> str:
         logger.info("开始查询食物营养信息: %s", food_name)
-        # 步骤 1: 优先查询本地数据库
+        
+        # 步骤 0: 优先查询 USDA API (新策略)
+        print(f"ℹ️ 尝试调用 USDA API 查询 '{food_name}'...")
+        logger.info("尝试调用 USDA API 查询 '%s'...", food_name)
+        try:
+            usda_data = _search_food_nutrition_structured(food_name)
+            if usda_data:
+                print(f"✅ 在 USDA API 中找到 '{food_name}'")
+                logger.info("在 USDA API 中找到 '%s'", food_name)
+                return self._format_usda_nutrition_info(usda_data, detailed)
+            else:
+                logger.info("通过 USDA API 未能查询到 '%s' 的营养信息", food_name)
+        except Exception as e:
+            logger.warning(f"查询 USDA API 时出错: {e}")
+
+        # 步骤 1: 查询本地数据库
         try:
             nutrition_info = self.database.get_nutrition_by_name(food_name)
             if nutrition_info:
@@ -69,12 +86,12 @@ class NutritionQueryTool(BaseTool):
             print(f"⚠️ 查询本地数据库时出错: {e}")
             logger.error("查询本地数据库时出错: %s", e)
 
-        # 步骤 2: 如果本地找不到，调用 Nutritionix API
-        print(f"ℹ️ 本地未找到 '{food_name}'，尝试调用 Nutritionix API...")
-        logger.info("本地未找到 '%s'，尝试调用 Nutritionix API...", food_name)
+        # 步骤 2: 如果 USDA 和 本地都找不到，回退到调用 Nutritionix API
+        print(f"ℹ️ USDA 和本地未找到 '{food_name}'，尝试调用 Nutritionix API...")
+        logger.info("USDA 和本地未找到 '%s'，尝试调用 Nutritionix API...", food_name)
         if not (NUTRITIONIX_APP_ID and NUTRITIONIX_API_KEY):
             logger.warning("未配置 Nutritionix API 密钥")
-            return f"抱歉，本地数据库中未找到'{food_name}'，且未配置外部API密钥。"
+            return f"抱歉，未能通过 USDA 或本地数据库找到'{food_name}'，且未配置 Nutritionix API 密钥。"
 
         headers = {"x-app-id": NUTRITIONIX_APP_ID, "x-app-key": NUTRITIONIX_API_KEY, "Content-Type": "application/json"}
         data = {"query": food_name}
@@ -89,7 +106,7 @@ class NutritionQueryTool(BaseTool):
                 return self._format_api_nutrition_info(api_data)
             else:
                 logger.info("通过 Nutritionix API 未能查询到 '%s' 的营养信息", food_name)
-                return f"抱歉，通过API也未能查询到 '{food_name}' 的营养信息。"
+                return f"抱歉，通过所有可用数据源都未能查询到 '{food_name}' 的营养信息。"
         except requests.exceptions.Timeout:
             logger.error("API 请求超时")
             return "API 请求超时，请稍后再试。"
@@ -98,6 +115,7 @@ class NutritionQueryTool(BaseTool):
             return f"API 请求失败: {e.response.status_code} {e.response.text}"
         except Exception as e:
             logger.error("调用API时发生未知错误: %s", str(e))
+            return f"调用API时发生未知错误: {str(e)}"
             return f"调用API时发生未知错误: {str(e)}"
 
     def _format_local_nutrition_info(self, info: Dict[str, Any], detailed: bool) -> str:
@@ -158,6 +176,57 @@ class NutritionQueryTool(BaseTool):
                     f"{food.get('food_name', '')}: "
                     f"{food.get('nf_calories', 0):.2f} 千卡\n"
                 )
+        return result
+
+    def _format_usda_nutrition_info(self, usda_data: Dict[str, Any], detailed: bool) -> str:
+        """格式化 USDA API 查询结果"""
+        food_name = usda_data.get("food_name", "未知食物")
+        nutrients = usda_data.get("nutrients", {})
+        
+        result = "### 🍎 食物营养查询\n\n"
+        result += f"*   **食物名称**: {food_name}\n"
+        result += "*   **来源**: 来自 USDA FoodData Central API\n"
+        result += "*   **基础营养 (每100g)**:\n"
+        
+        # 映射 USDA 营养素名称到中文和标准单位
+        nutrient_mapping = {
+            "热量": ("热量", "千卡"),
+            "蛋白质": ("蛋白质", "g"),
+            "总脂肪": ("脂肪", "g"),
+            "碳水化合物": ("碳水化合物", "g"),
+            "纤维": ("膳食纤维", "g"),
+            "糖": ("糖", "g"),
+            "钙": ("钙", "mg"),
+            "铁": ("铁", "mg"),
+            "维生素C": ("维生素C", "mg"),
+            "维生素D": ("维生素D", "µg"),
+            "维生素B12": ("维生素B12", "µg"),
+        }
+        
+        # 基础营养
+        base_nutrients = ["热量", "蛋白质", "碳水化合物", "总脂肪"]
+        for en_name in base_nutrients:
+            cn_name, unit = nutrient_mapping.get(en_name, (en_name, "g"))
+            value = nutrients.get(en_name, 0)
+            if en_name == "热量":
+                result += f"    *   {cn_name}: {value:.0f} {unit}\n" # 热量通常显示为整数
+            else:
+                result += f"    *   {cn_name}: {value:.2f} {unit}\n"
+                
+        if detailed:
+            result += "*   **详细营养 (每100g)**:\n"
+            # 添加其他营养素
+            for en_name, value in nutrients.items():
+                if en_name not in base_nutrients:
+                    cn_name, unit = nutrient_mapping.get(en_name, (en_name, "g"))
+                    # 避免重复打印基础营养
+                    if en_name not in [n[0] for n in nutrient_mapping.values()]:
+                        result += f"    *   {cn_name}: {value:.2f} {unit}\n"
+            # 添加未在 nutrient_mapping 中的其他营养素
+            for en_name, value in nutrients.items():
+                if en_name not in nutrient_mapping:
+                    result += f"    *   {en_name}: {value:.2f} g\n" # 默认单位为 g
+            
         return result
 
 
