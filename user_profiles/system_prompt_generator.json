@@ -10,7 +10,7 @@
     "dietary_restrictions": "无",
     "preferences": "无",
     "created_at": "2025-08-08T10:47:54.510868",
-    "updated_at": "2025-08-09T07:23:35.390287",
+    "updated_at": "2025-08-09T08:24:24.942569",
     "consultations": [
         {
             "consultation_id": "system_prompt_generator_20250808_104757",
@@ -209,6 +209,33 @@
             "answer": "\n\n['维持体重期间可以吃香蕉吗','每天喝多少水有助于代谢','压力大会导致体重增加吗','月经期间如何控制体重','吃火锅怎么点菜不超标']",
             "category": "general",
             "created_at": "2025-08-09T07:23:35.390287"
+        },
+        {
+            "consultation_id": "system_prompt_generator_20250809_082332",
+            "user_id": "system_prompt_generator",
+            "date": "2025-08-09",
+            "question": "我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。",
+            "answer": "['维持体重期间可以吃牛油果吗','每天摄入多少蛋白质不会掉肌肉','周末睡懒觉会打乱代谢节奏吗','下午四点饿了我该忍还是吃','喝代餐奶昔真的能稳体重吗']",
+            "category": "general",
+            "created_at": "2025-08-09T08:23:32.347439"
+        },
+        {
+            "consultation_id": "system_prompt_generator_20250809_082413",
+            "user_id": "system_prompt_generator",
+            "date": "2025-08-09",
+            "question": "我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。",
+            "answer": "['维持体重期间可以吃芝士吗','每天摄入多少纤维最稳肠道','熬夜会让基础代谢下降吗','饭后立刻散步会影响消化吗','无糖酸奶真的不会胖吗']",
+            "category": "general",
+            "created_at": "2025-08-09T08:24:13.741160"
+        },
+        {
+            "consultation_id": "system_prompt_generator_20250809_082424",
+            "user_id": "system_prompt_generator",
+            "date": "2025-08-09",
+            "question": "我的健康目标是'维持体重'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。",
+            "answer": "['维持体重期间可以吃冰淇淋吗','每天摄入多少咖啡因不影响睡眠','间歇性断食适合维稳体重吗','吃太快会导致热量超标吗','代糖饮料会扰乱食欲吗']",
+            "category": "general",
+            "created_at": "2025-08-09T08:24:24.942569"
         }
     ],
     "daily_logs": [],

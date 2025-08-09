@@ -60,7 +60,7 @@ class UserProfile(BaseModel):
 
     @validator('gender')
     def validate_gender(cls, v):
-        allowed_genders = ["男", "女", "其他"]
+        allowed_genders = ["男", "女", "其他", "未知"]
         if v not in allowed_genders:
             raise ValueError(f'性别必须是 {", ".join(allowed_genders)} 中的一个')
         return v
@@ -112,8 +112,13 @@ class UserMemory:
                 # Use Pydantic model's parse_obj method for robust deserialization
                 return UserProfile.parse_obj(user_data)
         except (json.JSONDecodeError, Exception) as e:  # Catch broader exceptions for Pydantic validation
-            print(f"❌ 读取或解析用户档案 {filepath} 失败: {e}")
-            logger.error(f"读取或解析用户档案 {filepath} 失败: {e}")
+            # 避免递归记录日志
+            if "maximum recursion depth exceeded" in str(e):
+                print(f"❌ 读取或解析用户档案 {filepath} 失败: {str(e)[:100]}...")
+                # 不再记录到logger，避免递归
+            else:
+                print(f"❌ 读取或解析用户档案 {filepath} 失败: {e}")
+                logger.error(f"读取或解析用户档案 {filepath} 失败: {e}")
             return None
 
     def _save_user_profile(self, profile: UserProfile) -> bool:

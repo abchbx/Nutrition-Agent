@@ -18,7 +18,7 @@ def generate_example_prompts(_user_id, _refresh_counter=0):
         profile = agent.get_user_profile(_user_id)
         health_goal = profile.health_goal if profile else "改善健康"
         meta_prompt = (
-            f"我的健康目标是'{health_goal}'。请为我这位营养助手的用户，生成5个简短、多样化且适合作为按钮示例的问题。" "直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。"
+            f"我的健康目标是'{health_goal}'。请为我这位营养助手的用户，生成3个简短、多样化且适合作为按钮示例的问题。" "直接返回一个Python列表，例如：['问题1','问题2']，不要多余解释。"
         )
         response = agent.chat("system_prompt_generator", meta_prompt)
 
@@ -215,39 +215,40 @@ def render_sidebar(agent, current_user_id):
 
 # ------------------------ 主界面 --------------------------
 def render_chat_interface(profile):
+    """渲染主聊天界面，包括标题、历史消息和示例问题。"""
     st.title("🍎 营养学 AI 助手")
-    st.caption(f"你好，**{profile.name if profile else st.session_state.user_id}**！" "我是你的专属营养师，随时为你服务。")
+    st.caption(f"你好，**{profile.name if profile else st.session_state.user_id}**！我是你的专属营养师，随时为你服务。")
 
-    # 历史消息
+    # 显示历史消息
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-    # 示例问题
+    # 初始化并获取示例问题
     if "example_refresh_counter" not in st.session_state:
         st.session_state.example_refresh_counter = 0
-    # 传递 user_id 而不是 profile 对象
     prompts = generate_example_prompts(st.session_state.user_id, st.session_state.example_refresh_counter)
 
-    # 限制只显示3个示例问题
+    # 限制只显示前3个示例
     display_prompts = prompts[:3] if prompts else []
 
     if display_prompts:
-        # 使用固定三列布局，确保按钮大小一致
         cols = st.columns(3)
         for c, p in zip(cols, display_prompts):
-            # 使用 use_container_width=True 确保按钮填满列宽
             if c.button(
                 p, use_container_width=True, key=f"example_btn_{hash(p)}_{st.session_state.example_refresh_counter}"
             ):
                 st.session_state.messages.append({"role": "user", "content": p})
                 st.rerun()
 
-        # 刷新按钮与示例问题按钮宽度对齐
-        if st.button("🔄 刷新示例", key="refresh_examples", use_container_width=True):
-            st.session_state.example_refresh_counter += 1
-            # 不再需要手动清除缓存 generate_example_prompts.clear()
-            st.rerun()
+    # --- 代码修复 ---
+    # 刷新按钮，点击时手动清除缓存
+    if st.button("🔄 刷新示例", key="refresh_examples", use_container_width=True):
+        # 核心修复：手动清除 generate_example_prompts 函数的缓存
+        generate_example_prompts.clear()
+        # 增加计数器以确保st.rerun后，函数参数不同，但清除缓存是关键
+        st.session_state.example_refresh_counter += 1
+        st.rerun()
 
 
 # -------------------- 聊天响应逻辑 -----------------------
